@@ -1,0 +1,5 @@
+*.pyc
+node_modules/*
+static/frontend/js/*
+.vscode/*
+Thumbs.db

@@ -1,0 +1,3206 @@
+// $base_url: 'https://gameserverstatic.azurewebsites.net/static/frontend';
+$base_url: '/static/frontend';
+$sprite_base: '#{$base_url}/sprites';
+$font_base: '#{$base_url}/fonts';
+
+@mixin sprite_animation ($url, $frames, $width, $animation_name, $frame_duration: 0.15s, $iteration_count: infinite) {
+    width: $width;
+
+    animation-duration: $frames * $frame_duration;
+    animation-name: $animation_name;
+    animation-timing-function: steps($frames);
+    animation-iteration-count: $iteration_count;
+
+    background-image: url($url);
+
+    @keyframes #{$animation_name} {
+        from { background-position: 0px; }
+        to { background-position: -$frames * $width; }
+    }
+}
+
+@mixin scalable_sprite_animation ($url, $frames, $animation_name: null, $frame_duration: 0.15s, $iteration_count: infinite) {
+    animation-duration: $frames * $frame_duration;
+    animation-name: $animation_name;
+    animation-timing-function: steps($frames);
+    animation-iteration-count: $iteration_count;
+
+    background-image: url($url);
+    background-size: $frames * 100%;
+    background-repeat: repeat-x;
+
+    @if $animation_name {
+        @keyframes #{$animation_name} {
+            from { background-position: 0px; }
+            to { background-position: -$frames * 100%; }
+        }
+    }
+}
+
+@mixin reaction_animation ($url, $frames, $width, $animation_name) {
+    @include sprite_animation($url, $frames, $width, $animation_name, 1.2s / $frames, 1);
+}
+
+@mixin reaction_animation_infinite ($url, $frames, $width, $animation_name) {
+    @include sprite_animation($url, $frames, $width, $animation_name, 1.2s / $frames);
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    cursor: url('#{$sprite_base}/ui/cursor_normal.png'), auto;
+    color: #d4d4d4;
+    background-color: #220a43;
+}
+
+a[href] {
+    color: cornflowerblue;
+}
+
+// CSS for the countdown page - uncomment and compile if needed
+// $time_digit_width: 5%;
+// $time_digit_thin: $time_digit_width * 2.15 / 5;
+
+// .countdown-timer-item {
+//     width: $time_digit_width;
+//     padding-top: 7%;
+
+//     &.time-colon {
+//         @include scalable_sprite_animation('/static/colon.png', 1);
+//         background-size: 230%;
+//         width: $time_digit_thin;
+//     }
+    
+//     @for $i from 0 through 9 {
+//         &.time-digit-#{$i} {
+//             @include scalable_sprite_animation('/static/digit_#{$i}.png', 1);
+//         }
+//     }
+    
+//     &.time-digit-1 {
+//         background-size: 230%;
+//         width: $time_digit_thin;
+//         margin-left: ($time_digit_width - $time_digit_thin) / 2;
+//         margin-right: ($time_digit_width - $time_digit_thin) / 2;
+//     }
+// }
+
+#intro-screen {
+    position: relative;
+    margin: auto;
+
+    @include scalable_sprite_animation('#{$sprite_base}/register/intro_spritesheet.png', 12, intro_animation);
+
+    @keyframes intro_animation {
+        from { background-position: 0px; }
+        8.3% { background-position: -1 * 100%; }
+        16.6% { background-position: -2 * 100%; }
+        24.9% { background-position: -3 * 100%; }
+        33.2% { background-position: -4 * 100%; }
+        41.5% { background-position: -5 * 100%; }
+        49.8% { background-position: -6 * 100%; }
+        58.1% { background-position: -7 * 100%; }
+        66.4% { background-position: -8 * 100%; }
+        74.7% { background-position: -9 * 100%; }
+        83% { background-position: -10 * 100%; }
+        // for some reason 11 causes issues with fullscreen
+        91.3% { background-position: -11 * 100% - 0.001; }
+        to { background-position: -12 * 100%; }
+    }
+    animation-name: intro_animation;
+    animation-timing-function: step-end;
+
+    @media (max-aspect-ratio: 16/9) {
+        height: 57vw;
+        position: relative;
+        top: calc((100vh - 57vw) / 2);
+    }
+    @media (min-aspect-ratio: 16/9) {
+        height: 100%;
+        width: 178vh;
+    }
+}
+
+#intro-button {
+    @include scalable_sprite_animation('#{$sprite_base}/register/intro_button.png', 1);
+    background-color: transparent;
+    border: transparent;
+    width: 20%;
+    height: 10%;
+
+    margin: 0;
+    position: relative;
+    top: 60%;
+    left: 40%;
+}
+
+#register-button {
+    @include scalable_sprite_animation('#{$sprite_base}/register/register_button.png', 1);
+    background-color: transparent;
+    border: transparent;
+    width: 14vh;
+    padding-bottom: 7%;
+    margin: 0;
+}
+
+.login-background {
+    background-image: url('#{$sprite_base}/register/register_background.png');
+    background-size: cover;
+    background-position-x: left;
+    background-position-y: top;
+    background-repeat: round;
+}
+
+#preloadedImages
+{
+    display: none;
+    width: 0px;
+    height: 0px;
+    display: inline;
+    background-image: url('#{$sprite_base}/register/crusty_hover_spritesheet.png'), url('#{$sprite_base}/register/rusty_hover_spritesheet.png'), url('#{$sprite_base}/register/crusty_selected_spritesheet.png'), url('#{$sprite_base}/register/rusty_selected_spritesheet.png');
+}
+
+#crusty-selection {
+    .character-sprite {
+        @include scalable_sprite_animation('#{$sprite_base}/register/crusty_idle_spritesheet.png', 8, crusty_selection_idle);
+        width: 25vh;
+        padding-top: 116%;
+
+        
+        &:hover {
+            @include scalable_sprite_animation('#{$sprite_base}/register/crusty_hover_spritesheet.png', 57, crusty_selection_hover);
+            animation-delay: 0s;
+            
+            transform: translate(0.2vh);
+            cursor: url('#{$sprite_base}/ui/cursor_pointer.png'), pointer;
+        }
+        
+    }
+    &.selected-character {
+        .character-sprite {
+            @include scalable_sprite_animation('#{$sprite_base}/register/crusty_selected_spritesheet.png', 8, crusty_selection_selected);
+            transform: translate(0.2vh);
+        }
+    }
+}
+
+#rusty-selection {
+    .character-sprite {
+        @include scalable_sprite_animation('#{$sprite_base}/register/rusty_idle_spritesheet.png', 8, rusty_selection_idle);
+        width: 25vh;
+        padding-top: 116%;
+
+        &:hover {
+            @include scalable_sprite_animation('#{$sprite_base}/register/rusty_hover_spritesheet.png', 27, rusty_selection_hover);
+            animation-delay: 0s;
+            
+            transform: translateX(-0.2vh);
+            cursor: url('#{$sprite_base}/ui/cursor_pointer.png'), pointer;
+        }
+    }
+    &.selected-character {
+        .character-sprite {
+            @include scalable_sprite_animation('#{$sprite_base}/register/rusty_selected_spritesheet.png', 8, rusty_selection_selected);
+            transform: translateX(-0.2vh);
+        }
+    }
+}
+
+#lets-rock-button {
+    @include scalable_sprite_animation('#{$sprite_base}/register/lets_rock_button.png', 1, noop);
+    background-color: transparent;
+    border: transparent;
+    width: 20vh;
+    padding-top: 3%;
+    
+    margin: 0;
+}
+
+#stage {
+    position: relative;
+    font: bold 19px MunroSmall;
+
+    h2, p, .word, .name {
+        font-family: LanaPixel;
+        line-height: 22px;
+    }
+
+    p {
+        font-weight: normal;
+    }
+
+    >* {
+        position: absolute;
+    }
+
+    #MapView {
+        background-image: url('#{$sprite_base}/map/map_1920x1080_x2.png');
+    
+        &.tutorial {
+            background-image: url('#{$sprite_base}/tutorial/room_2.png');
+        }
+        >* {
+            position: absolute;
+        }
+    }
+}
+
+#character {
+    transition: top 0.1s, left 0.1s;
+
+    &.Crusty {
+        height: 64px;
+        @include sprite_animation('#{$sprite_base}/characters/MainCharacters/Crusty/crusty_idle.png', 17, 64px, crusty_idle_sprite);
+        
+        &.up {
+            @include sprite_animation('#{$sprite_base}/characters/MainCharacters/Crusty/crusty_back.png', 7, 64px, crusty_back_sprite);
+        }
+        
+        &.down {
+            @include sprite_animation('#{$sprite_base}/characters/MainCharacters/Crusty/crusty_front.png', 7, 64px, crusty_front_sprite);
+        }
+
+        &.left {
+            @include sprite_animation('#{$sprite_base}/characters/MainCharacters/Crusty/crusty_side.png', 5, 64px, crusty_side_sprite);
+        }
+
+        &.right {
+            @include sprite_animation('#{$sprite_base}/characters/MainCharacters/Crusty/crusty_side.png', 5, 64px, crusty_side_sprite);
+            transform: scaleX(-1);
+        }
+    }
+
+    &.Rusty {
+        height: 68px;
+        @include sprite_animation('#{$sprite_base}/characters/MainCharacters/rusty/rusty_idel_spritesheet.png', 5, 50px, rusty_idle_sprite);
+        
+        
+        &.up {
+            @include sprite_animation('#{$sprite_base}/characters/MainCharacters/Rusty/rusty_back_spritesheet_x2.png', 16, 50px, rusty_back_sprite);
+        }
+        
+        &.down {
+            @include sprite_animation('#{$sprite_base}/characters/MainCharacters/Rusty/rusty_front_spritesheet_x2.png', 16, 50px, rusty_front_sprite);
+        }
+
+        &.left {
+            @include sprite_animation('#{$sprite_base}/characters/MainCharacters/Rusty/rusty_left_spritesheet_x2.png', 8, 50px, rusty_side_sprite);
+        }
+
+        &.right {
+            @include sprite_animation('#{$sprite_base}/characters/MainCharacters/Rusty/rusty_left_spritesheet_x2.png', 8, 50px, rusty_side_sprite);
+            transform: scaleX(-1);
+        }
+    }
+}
+
+.artifact {
+    &.chimeny {
+        height: 497px;
+        @include sprite_animation('#{$sprite_base}/map/Chimeny/Normal/chimeny_normal.png', 10, 224px, chimeny_spritesheet);
+
+        &.ruins {
+            height: 497px;
+            @include sprite_animation('#{$sprite_base}/map/Chimeny/Ruins/chimeny_ruins.png', 1, 224px, chimeny_ruins_spritesheet);
+        }
+    }
+
+    &.arena {
+        height: 138px;
+        @include sprite_animation('#{$sprite_base}/map/Arena/Normal/arena_normal.png', 11, 310px, arena_spritesheet);
+ 
+        &.ruins {
+            height: 138px;
+            @include sprite_animation('#{$sprite_base}/map/Arena/Ruins/arena_ruins.png', 1, 310px, arena_ruins_spritesheet);
+        }
+
+    }
+
+    &.armory {
+        height: 145px;
+        @include sprite_animation('#{$sprite_base}/map/Armory/Normal/armory_normal.png', 13, 203px, armory_spritesheet);
+   
+        &.ruins { 
+            height: 145px;
+            @include sprite_animation('#{$sprite_base}/map/armory/Ruins/armory_ruins.png', 1, 203px, armory-ruins_spritesheet);
+        } 
+    }
+
+    &.door {
+        height: 194px;
+        @include sprite_animation('#{$sprite_base}/map/Door/Normal/door_right_normal.png', 7, 178px, door_spritesheet);
+  
+        &.ruins { 
+            height: 194px;
+            @include sprite_animation('#{$sprite_base}/map/door/Ruins/door_ruins.png', 1, 178px, door_ruins_spritesheet);
+        }
+
+    }
+    &.door2 {
+        height: 194px;
+        @include sprite_animation('#{$sprite_base}/map/Door/Normal/door_left_normal.png', 7, 178px, door2_spritesheet);
+ 
+        &.ruins { 
+            height: 194px;
+            @include sprite_animation('#{$sprite_base}/map/door/Ruins/door_ruins_2.png', 1, 178px, door_ruins_2_spritesheet);
+        }
+    }
+
+    &.lake_dino {
+        height: 270px;
+        @include sprite_animation('#{$sprite_base}/map/Lake_Dino/Challenge/lake_dino_unlocked.png', 24, 782px, lake_dino_unlocked_spritesheet);
+
+        &.locked {
+            @include sprite_animation('#{$sprite_base}/map/Lake_Dino/Locked/lake_dino_locked.png', 24, 782px, lake_dino_locked_spritesheet);
+        }
+
+        &.unlocking {
+            @include sprite_animation('#{$sprite_base}/map/Lake_Dino/Challenge/lake_dino_unlocking.png', 89, 782px, lake_dino_unlocking_spritesheet, 0.1s, 1);
+        }
+    }
+
+    &.garden_jungle {
+        height: 264px;
+        @include sprite_animation('#{$sprite_base}/map/Garden_Jungle/Normal/graden_jungle_normal.png', 11, 245px, garden-Sheet_spritesheet);
+ 
+        &.ruins { 
+            height: 264px;
+            @include sprite_animation('#{$sprite_base}/map/Garden_Jungle/Ruins/graden_jungle_ruins.png', 9, 245px, garden_ruins_spritesheet);
+        }    
+    }
+
+    &.monoment {
+        height: 294px;
+        @include sprite_animation('#{$sprite_base}/map/Monoment/Normal/monoment_normal.png', 16, 215px, monoment_spritesheet);
+       
+        &.ruins { 
+            height: 294px;
+            @include sprite_animation('#{$sprite_base}/map/Monoment/Ruins/monoment_ruins.png', 1, 215px, monoment_ruins_spritesheet);
+        }  
+    }
+
+    &.rc_cars {
+        height: 234px;
+        @include sprite_animation('#{$sprite_base}/map/RC_Cars/Normal/rc_cars_normal.png', 9, 286px, rc_cars_spritesheet);
+  
+        &.ruins { 
+            height: 210px;
+            @include sprite_animation('#{$sprite_base}/map/RC_Cars/Ruins/rc_cars_ruins.png', 6, 266px, rc_cars_ruins_spritesheet);
+        } 
+
+    }
+
+    &.casino {
+        height: 226px;
+        @include sprite_animation('#{$sprite_base}/map/Casino/Normal/casino_normal.png', 10, 253px, casino_spritesheet);
+  
+        &.ruins { 
+            height: 226px;
+            @include sprite_animation('#{$sprite_base}/map/casino/Ruins/casino_ruins.png', 1, 253px, casino_ruins_spritesheet);
+        } 
+    }
+
+    &.weather_ballons {
+        height: 1032px;
+        @include sprite_animation('#{$sprite_base}/map/Weather_Ballons/Challenge/weather_ballons_unlocked.png', 4, 304px, weather_ballons_unlocked_spritesheet);
+
+        &.locked {
+            @include sprite_animation('#{$sprite_base}/map/Weather_Ballons/Locked/weather_ballons_locked.png', 4, 304px, weather_ballons_locked_spritesheet);
+        }
+
+        &.unlocking {
+            @include sprite_animation('#{$sprite_base}/map/Weather_Ballons/Challenge/weather_ballons_unlocking.png', 69, 304px, weather_ballons_unlocking_spritesheet, 0.1s, 1);
+        }  
+    }
+
+    &.tower {
+        height: 319px;
+        @include sprite_animation('#{$sprite_base}/map/Tower/Challenge/tower_unlocked.png', 18, 249px, tower_unlocked_spritesheet);
+  
+        &.locked {
+            @include sprite_animation('#{$sprite_base}/map/Tower/Locked/tower_locked.png', 9, 249px, tower_spritesheet);
+        }
+
+        &.unlocking {
+            @include sprite_animation('#{$sprite_base}/map/Tower/Challenge/Tower_unlocking.png', 69, 249px, Tower_unlocking_spritesheet, 0.1s, 1);
+        }  
+    }
+
+    &.tower_empty {
+        height: 304px;
+        @include sprite_animation('#{$sprite_base}/map/Tower/Normal/tower_empy_normal.png', 18, 152px, tower_empty_spritesheet);
+   
+        &.ruins { 
+            height: 308px;
+            @include sprite_animation('#{$sprite_base}/map/Tower/Ruins/tower_ruins.png', 1, 229px, tower_ruins_spritesheet);
+        }  
+    }
+
+    &.flowers_batch1 {
+        height: 65px;
+        @include sprite_animation('#{$sprite_base}/map/Flowers/Normal/flowers_batch_normal.png', 2, 1126px, flowers_batch1_spritesheet);
+     
+        &.ruins { 
+            height: 68px;
+            @include sprite_animation('#{$sprite_base}/map/Flowers/Ruins/red_flower_ruins.png', 1, 1126px, red_flower_ruins_spritesheet);
+        } 
+    }
+
+
+    &.market_batch {
+        height: 160px;
+        @include sprite_animation('#{$sprite_base}/map/Market_Batch/Normal/market_batch_normal.png', 22, 232px, market_batch_spritesheet);
+     
+        &.ruins { 
+            height: 183px;
+            @include sprite_animation('#{$sprite_base}/map/Market_Batch/Ruins/market_batch_ruins.png', 1, 232px, market_batch_ruins_spritesheet);
+        }     
+    }
+
+    &.market {
+        height: 62px;
+        @include sprite_animation('#{$sprite_base}/map/Market/Normal/market_normal.png', 24, 100px, market_spritesheet);
+   
+        &.ruins { 
+            height: 62px;
+            @include sprite_animation('#{$sprite_base}/map/Market/Ruins/market_ruins.png', 1, 100px, market_ruins_spritesheet);
+        } 
+    }
+
+    &.chicken {
+        height: 26px;
+        @include sprite_animation('#{$sprite_base}/map/Chicken/Normal/chicken_normal.png', 10, 26px, chicken_spritesheet);
+  
+        &.ruins { 
+            height: 26px;
+            @include sprite_animation('#{$sprite_base}/map/Chicken/Ruins/chicken_ruins.png', 1, 26px, chicken_ruins_spritesheet);
+        } 
+    }
+
+    &.house_blue {
+        height: 74px;
+        @include sprite_animation('#{$sprite_base}/map/Houses/House_Blue/Normal/house_blue_normal.png', 1, 78px, house_blue_spritesheet);
+   
+        &.ruins { 
+            height: 74px;
+            @include sprite_animation('#{$sprite_base}/map/Houses/House_blue/Ruins/house_blue_ruins.png', 1, 78px, house_blue_ruins_spritesheet);
+        }
+    }
+
+    &.house_green {
+        height: 74px;
+        @include sprite_animation('#{$sprite_base}/map/Houses/House_Green/Normal/house_green_normal.png', 1, 78px, house_green_spritesheet);
+  
+        &.ruins { 
+            height: 74px;
+            @include sprite_animation('#{$sprite_base}/map/Houses/House_green/Ruins/house_green_ruins.png', 1, 78px, house_green_ruins_spritesheet);
+        }
+    }
+
+    &.house_yellow {
+        height: 74px;
+        @include sprite_animation('#{$sprite_base}/map/Houses/House_Yellow/Normal/house_yellow_normal.png', 1, 78px, house_yellow_spritesheet);
+  
+        &.ruins { 
+            height: 74px;
+            @include sprite_animation('#{$sprite_base}/map/Houses/House_yellow/Ruins/house_yellow_ruins.png', 1, 78px, house_red_ruins_spritesheet);
+        }
+    }
+
+    &.house_red {
+        height: 74px;
+        @include sprite_animation('#{$sprite_base}/map/Houses/House_Red/Normal/house_red_normal.png', 1, 78px, house_red_spritesheet);
+  
+        &.ruins { 
+            height: 74px;
+            @include sprite_animation('#{$sprite_base}/map/Houses/House_Red/Ruins/house_red_ruins.png', 1, 78px, house_red_ruins_spritesheet);
+        }
+    }
+
+    &.maze {
+        height: 376px;
+        @include sprite_animation('#{$sprite_base}/map/Maze/Normal/maze_normal.png', 120, 328px, maze_spritesheet);
+ 
+        &.ruins { 
+            height: 376px;
+            @include sprite_animation('#{$sprite_base}/map/Maze/Ruins/maze_ruins.png', 12, 328px, maze_ruins_spritesheet);
+        }
+    }
+
+    &.shroom_1 {
+        height: 32px;
+        @include sprite_animation('#{$sprite_base}/map/Shrooms/Shroom1/Normal/shroom_1_normal.png', 1, 82px, shroom_1_spritesheet);
+
+        &.ruins { 
+            height: 32px;
+            @include sprite_animation('#{$sprite_base}/map/Shrooms/Shroom1/Ruins/shroom_1_ruins.png', 1, 82px, shroom_1_ruins_spritesheet);
+        }
+    }
+
+    &.shroom_2 {
+        height: 34px;
+        @include sprite_animation('#{$sprite_base}/map/Shrooms/Shroom2/Normal/shroom_2_normal.png', 1, 76px, shroom_2_spritesheet);
+  
+        &.ruins { 
+            height: 34px;
+            @include sprite_animation('#{$sprite_base}/map/Shrooms/Shroom2/Ruins/shroom_2_ruins.png', 1, 76px, shroom_2_ruins_spritesheet);
+        } 
+    }
+
+    &.shroom_3 {
+        height: 88px;
+        @include sprite_animation('#{$sprite_base}/map/Shrooms/Shroom3/Normal/shroom_3_normal.png', 1, 74px, shroom_3_spritesheet);
+
+        
+        &.ruins { 
+            height: 88px;
+            @include sprite_animation('#{$sprite_base}/map/Shrooms/Shroom3/Ruins/shroom_3_ruins.png', 1, 74px, shroom_3_ruins_spritesheet);
+        }  
+    }
+    
+    &.dance_hall {
+        height: 290px;
+        @include sprite_animation('#{$sprite_base}/map/Dance_Hall/Challenge/dance_hall_unloked.png', 24, 560px, dance_hall_unlocked_spritesheet);
+  
+        &.locked {
+            @include sprite_animation('#{$sprite_base}/map/Dance_Hall/locked/Dance_Hall_locked.png', 24, 396px, Dance_Hall_locked_spritesheet);
+        }
+
+        &.unlocking {
+            @include sprite_animation('#{$sprite_base}/map/Dance_Hall/Challenge/Dance_Hall_unlocking.png', 29, 560px, Dance_Hall_unlocking_spritesheet, 0.1s, 1);
+        }
+    }
+    
+    &.mush_01 {
+        height: 30px;
+        @include sprite_animation('#{$sprite_base}/map/Mush/Mush1/Normal/mush_01_normal.png', 1, 28px, mush_01_spritesheet);
+    }
+    &.mush_02 {
+        height: 14px;
+        @include sprite_animation('#{$sprite_base}/map/Mush/Mush2/Normal/mush_02_normal.png', 1, 16px, mush_02_spritesheet);
+    }
+    &.arena_ladder {
+        height: 74px;
+        @include sprite_animation('#{$sprite_base}/map/Arena_Ladder/Normal/arena_ladder_normal.png', 1, 64px, arena_ladder_spritesheet);
+
+        &.ruins { 
+            height: 74px;
+            @include sprite_animation('#{$sprite_base}/map/Arena_Ladder/Ruins/arena_ladder_ruins.png', 1, 64px, arena_ladder_ruins_spritesheet);
+        } 
+    }
+
+    &.sword {
+        height: 28px;
+        @include sprite_animation('#{$sprite_base}/map/Sword/Normal/sword_normal.png', 11, 28px, sword_spritesheet);
+  
+        &.ruins { 
+            height: 28px;
+            @include sprite_animation('#{$sprite_base}/map/Sword/Ruins/sword_ruins.png', 1, 28px, sword_ruins_spritesheet);
+        } 
+    }
+
+    &.blue_flower {
+        height: 66px;
+        @include sprite_animation('#{$sprite_base}/map/Flowers/Normal/blue_flower_left_normal.png', 6, 60px, blue_flower_spritesheet);
+ 
+        &.ruins { 
+            height: 66px;
+            @include sprite_animation('#{$sprite_base}/map/Flowers/Ruins/blue_flower_ruins.png', 1, 60px, blue_flower_ruins_spritesheet);
+        }  
+    }
+
+    &.blue_flower_2 {
+        height: 66px;
+        @include sprite_animation('#{$sprite_base}/map/Flowers/Normal/blue_flower_right_normal.png', 6, 60px, blue_flower_2_spritesheet);
+  
+        &.ruins { 
+            height: 66px;
+            @include sprite_animation('#{$sprite_base}/map/Flowers/Ruins/blue_flower_ruins_2.png', 1, 60px, blue_flower_ruins_2_spritesheet);
+        } 
+    }
+
+    &.cactus_big {
+        height: 42px;
+        @include sprite_animation('#{$sprite_base}/map/Cactus/Big/Normal/cactus_big_normal.png', 4, 32px, cactus_big_spritesheet);
+ 
+        &.ruins { 
+            height: 42px;
+            @include sprite_animation('#{$sprite_base}/map/Cactus/Big/Ruins/cactus_big_ruins.png', 1, 32px, cactus_big_ruins_spritesheet);
+        } 
+    }
+
+    &.cactus_small {
+        height: 32px;
+        @include sprite_animation('#{$sprite_base}/map/Cactus/Small/Normal/cactus_small_normal.png', 3, 28px, cactus_small_spritesheet);
+ 
+        &.ruins { 
+            height: 32px;
+            @include sprite_animation('#{$sprite_base}/map/Cactus/small/Ruins/cactus_small_ruins.png', 1, 28px, cactus_small_ruins_spritesheet);
+        } 
+    }
+
+    &.small_house {
+        height: 44px;
+        @include sprite_animation('#{$sprite_base}/map/Houses/Small_House/Normal/small_house_normal.png', 1, 66px, small_house_spritesheet);
+   
+        &.ruins { 
+            height: 44px;
+            @include sprite_animation('#{$sprite_base}/map/Houses/Small_House/Ruins/small-house_ruins.png', 1, 66px, small-house_ruins_spritesheet);
+        } 
+    }
+
+    &.mysticflower {
+        height: 48px;
+        @include sprite_animation('#{$sprite_base}/map/Flowers/Normal/mysticflower_normal.png', 4, 60px, mysticflower_spritesheet);
+    }
+    &.big_lake {
+        height: 672px;
+        @include sprite_animation('#{$sprite_base}/map/Big_Lake/Normal/lake_big_normal.png', 16, 304px, lake_spritesheet);
+    }
+    &.fence {
+        height: 28px;
+        @include sprite_animation('#{$sprite_base}/map/Fence/Normal/fence_normal.png', 1, 162px, fence_spritesheet);
+   
+        &.ruins { 
+            height: 28px;
+            @include sprite_animation('#{$sprite_base}/map/Fence/Ruins/fence_ruins.png', 1, 162px, fence_ruins_spritesheet);
+        }   
+    }
+
+    &.big_rock {
+        height: 24px;
+        @include sprite_animation('#{$sprite_base}/map/Big_Rock/Normal/big_rock_normal.png', 1, 54px, big_rock_spritesheet);
+    }
+    &.stone_small {
+        height: 16px;
+        @include sprite_animation('#{$sprite_base}/map/Stone_Small/Normal/stone_small_normal.png', 1, 42px, stone_small_spritesheet);
+    }
+    
+    &.island {
+        height: 140px;
+        @include sprite_animation('#{$sprite_base}/map/Island/Normal/island_normal.png', 12, 130px, island_spritesheet);
+ 
+        &.ruins { 
+            height: 140px;
+            @include sprite_animation('#{$sprite_base}/map/Island/Ruins/island_ruins.png', 1, 130px,island_ruins_spritesheet);
+        }
+
+    }
+    &.big_tree {
+        height: 64px;
+        @include sprite_animation('#{$sprite_base}/map/Big_Tree/Normal/big_tree_normal.png', 4, 148px, big_tree_spritesheet);
+  
+        &.ruins { 
+            height: 64px;
+            @include sprite_animation('#{$sprite_base}/map/Big_Tree/Ruins/big_tree_ruins.png', 8, 148px, big_tree_ruins_spritesheet);
+        }   
+    }
+
+    &.carrot {
+        height: 20px;
+        @include sprite_animation('#{$sprite_base}/map/Carrot/Normal/carrot_normal.png', 1, 24px, carrot_spritesheet);
+    }
+    &.bush {
+        height: 50px;
+        @include sprite_animation('#{$sprite_base}/map/Bushes/Bush/Normal/bush_normal.png', 15, 52px, bush_spritesheet);
+ 
+        &.ruins { 
+            height: 44px;
+            @include sprite_animation('#{$sprite_base}/map/Bushes/Bush/Ruins/bush_ruins.png', 1, 52px, bush_ruins_spritesheet);
+        }   
+    }
+
+    &.bush_group {
+        height: 74px;
+        @include sprite_animation('#{$sprite_base}/map/Bushes/Bush_Group/Normal/bush_group_normal.png', 12, 96px, bush_group_spritesheet);
+ 
+        &.ruins { 
+            height: 74px;
+            @include sprite_animation('#{$sprite_base}/map/Bushes/Bush_Group/Ruins/bush_group_ruins.png', 1, 96px, bush_group_ruins_spritesheet);
+        }  
+    }
+
+    &.bush_big {
+        height: 76px;
+        @include sprite_animation('#{$sprite_base}/map/Bushes/Bush_Big/Normal/bush_big_normal.png', 1, 135px, bush_big_spritesheet);
+  
+        &.ruins { 
+            height: 76px;
+            @include sprite_animation('#{$sprite_base}/map/Bushes/Bush_big/Ruins/bush_big_ruins.png', 1, 135px, bush_big_ruins_spritesheet);
+        } 
+    }
+
+    
+    &.red_flower_l {
+        height: 30px;
+        @include sprite_animation('#{$sprite_base}/map/Flowers/Normal/red_flower_left_normal.png', 2, 40px, red_flower_l_spritesheet);
+ 
+        &.ruins { 
+            height: 30px;
+            @include sprite_animation('#{$sprite_base}/map/Flowers/Ruins/red_flower_left_ruins.png', 1, 44px, red_flower_left_ruins_spritesheet);
+        }    
+    }
+
+    &.red_flower_r {
+        height: 30px;
+        @include sprite_animation('#{$sprite_base}/map/Flowers/Normal/red_flower_right_normal.png', 2, 40px, red_flower_r_spritesheet);
+  
+        &.ruins { 
+            height: 30px;
+            @include sprite_animation('#{$sprite_base}/map/Flowers/Ruins/red_flower_right_ruins.png', 1, 44px, red_flower_right_ruins_spritesheet);
+        }  
+  
+    }
+    &.roses {
+        height: 58px;
+        @include sprite_animation('#{$sprite_base}/map/Flowers/Normal/roses_normal.png', 7, 80px, roses_spritesheet);
+    }
+    &.sign {
+        height: 18px;
+        @include sprite_animation('#{$sprite_base}/map/Sign/Normal/sign_normal.png', 1, 28px, sign_spritesheet);
+  
+        &.ruins { 
+            height: 18px;
+            @include sprite_animation('#{$sprite_base}/map/Sign/Ruins/sign_ruins.png', 1, 28px, sign_ruins_spritesheet);
+        } 
+
+    }
+    &.stone_green {
+        height: 22px;
+        @include sprite_animation('#{$sprite_base}/map/Stone_Green/Normal/stone_green_normal.png', 1, 40px, stone_green_spritesheet);
+    }
+    &.wood {
+        height: 22px;
+        @include sprite_animation('#{$sprite_base}/map/Wood/Normal/wood_normal.png', 1, 38px, wood_spritesheet);
+    }
+    &.yellow_flower {
+        height: 52px;
+        @include sprite_animation('#{$sprite_base}/map/Flowers/Normal/yellow_flower_normal.png', 15, 38px, yellow_flower_spritesheet);
+  
+        &.ruins { 
+            height: 59px;
+            @include sprite_animation('#{$sprite_base}/map/Flowers/Ruins/yellow_flower_ruins.png', 1, 43px, yellow_flower_ruins_spritesheet);
+        } 
+        
+    }
+    &.tree_long {
+        height: 66px;
+        @include sprite_animation('#{$sprite_base}/map/Tree/Tree_Long/Normal/tree_long_normal.png', 5, 30px, tree_long_spritesheet);
+  
+        &.ruins { 
+            height: 66px;
+            @include sprite_animation('#{$sprite_base}/map/Tree/Tree_Long/Ruins/tree_long2.png', 1, 30px, tree_long2_spritesheet);
+        } 
+    }
+
+    &.tree_3_together {
+        height: 100px;
+        @include sprite_animation('#{$sprite_base}/map/Tree/Tree3_Together/Normal/tree3_together_normal.png', 16, 125px, tree_3_together_spritesheet);
+  
+        &.ruins { 
+            height: 100px;
+            @include sprite_animation('#{$sprite_base}/map/Tree/Tree3_Together/Ruins/tree_3_together_ruins.png', 1, 125px, tree_3_together_ruins_spritesheet);
+        } 
+    }
+
+    &.tree_group {
+        height: 134px;
+        @include sprite_animation('#{$sprite_base}/map/Tree/Tree_Group/Normal/tree_group_normal.png', 11, 287px, tree_group_spritesheet);
+  
+        &.ruins { 
+            height: 134px;
+            @include sprite_animation('#{$sprite_base}/map/Tree/Tree_Group/Ruins/tree_group_ruins.png', 1, 287px, tree_group_ruins_spritesheet);
+        } 
+    }
+
+    &.tree_round {
+        height: 68px;
+        @include sprite_animation('#{$sprite_base}/map/Tree/Tree_Round/Normal/tree_round_normal.png', 20, 64px, tree_round_spritesheet);
+  
+        &.ruins { 
+            height: 68px;
+            @include sprite_animation('#{$sprite_base}/map/Tree/Tree_Round/Ruins/tree_round_ruins.png', 1, 64px, tree_round_ruins_spritesheet);
+        } 
+    }
+
+    &.lake_big {
+        height: 270px;
+        @include sprite_animation('#{$sprite_base}/map/lake_spritesheet_x2.png', 24, 782px, lake_big_spritesheet);
+    }
+    &.lake_house {
+        height: 324px;
+        @include sprite_animation('#{$sprite_base}/map/Lake_house/Challenge/lake_house_unlocked.png', 1, 670px, lake_house_unlocked_spritesheet);
+    
+        &.locked {
+            @include sprite_animation('#{$sprite_base}/map/Lake_house/locked/lake_house_locked.png', 16, 670px, lake_house_spritesheet);
+        }
+
+        &.unlocking {
+            @include sprite_animation('#{$sprite_base}/map/Lake_house/Challenge/lake_house_unlocking.png', 38, 653px, lake_house_unlocking_spritesheet, 0.1s, 1);
+        }  
+
+    }
+   
+
+    &.MagicForest_R {
+        height: 500px;
+        @include sprite_animation('#{$sprite_base}/map/Magic_Forest/Right_Side/Normal/magic_forest_right_normal.png', 12, 372px, MagicForest_R_spritesheet);
+   
+        &.ruins { 
+            height: 500px;
+            @include sprite_animation('#{$sprite_base}/map/Magic_Forest/right_side/Ruins/magic_forest_right_ruins.png', 10, 372px, magic_forest_right_ruins_spritesheet);
+        }  
+    }
+
+    &.MagicForest_L {
+        height: 500px;
+        @include sprite_animation('#{$sprite_base}/map/Magic_Forest/Left_Side/Normal/magic_forest_left_normal.png', 12, 574px, MagicForest_L_spritesheet);
+  
+        &.ruins { 
+            height: 500px;
+            @include sprite_animation('#{$sprite_base}/map/Magic_Forest/left_side/Ruins/magic_forest_left_ruins.png', 7, 598px, magic_forest_left_ruins_spritesheet);
+        } 
+    }
+
+    &.MagicForest_Road {
+        height: 380px;
+        @include sprite_animation('#{$sprite_base}/map/Magic_Forest/Pathway/Normal/magic_forest_road_normal.png', 12, 172px, MagicForest_Road_spritesheet); 
+
+}
+
+
+&.poison_mush {
+    height: 32px;
+    @include sprite_animation('#{$sprite_base}/map/Poison_Mushroom/normal/poison_mush.png', 20, 30px, poison_mush_spritesheet); 
+
+}
+
+&.poison_mush_2{
+    height: 30px;
+    @include sprite_animation('#{$sprite_base}/map/Poison_Mushroom/normal/poison_mush_2.png', 22, 30px, poison_mush_2_spritesheet); 
+
+}
+
+&.grow_mush{
+    height: 15px;
+    @include sprite_animation('#{$sprite_base}/map/Grow_mush/normal/grow_mush.png', 22, 20px, row_mush_spritesheet); 
+
+}
+&.mole{
+    height: 44px;
+    @include sprite_animation('#{$sprite_base}/map/mole/mole.png', 40, 48px, mole_spritesheet); 
+    
+    &.ruins { 
+        height: 44px;
+        @include sprite_animation('#{$sprite_base}/map/mole/Ruins/mole_ruins.png', 12, 48px, mole_ruins_spritesheet);
+    } 
+
+}
+&.blue_gem{
+    height: 14px;
+    @include sprite_animation('#{$sprite_base}/map/Gems/blue_gem.png', 10, 28px, blue_gem_spritesheet); 
+
+}
+&.yellow_gem{
+    height: 14px;
+    @include sprite_animation('#{$sprite_base}/map/Gems/yellow_gem.png', 10, 28px, yellow_gem_spritesheet); 
+
+}
+
+    //TUTORIAL
+    &.t_candle {
+        height: 64px;
+        @include sprite_animation('#{$sprite_base}/tutorial/candle-spirteheet.png', 6, 44px, t_candle_spritesheet);
+        
+    }
+    &.t_cat {
+        height: 72px;
+        @include sprite_animation('#{$sprite_base}/tutorial/cat_window_spritesheet.png', 6, 46px, t_cat_spriteheet);
+        
+    }
+    &.t_cactus_small {
+        height: 50px;
+        @include sprite_animation('#{$sprite_base}/tutorial/cactus_small_spritesheet.png', 4, 36px, t_cactus_small_spriteheet);
+        
+    }
+
+    &.t_cactus_big {
+        height: 72px;
+        @include sprite_animation('#{$sprite_base}/tutorial/cactus_big_spriteheet.png', 6, 50px, cactus_big_spriteheet);
+    }
+
+    &.t_book_1 {
+        height: 56px;
+        @include sprite_animation('#{$sprite_base}/tutorial/book_1-spriteheet.png', 6, 52px, t_book_1_spriteheet);   
+    }
+
+    &.t_book_2 {
+        height: 56px;
+        @include sprite_animation('#{$sprite_base}/tutorial/book_2-spriteheet.png', 6, 56px, t_book_2_spriteheet);
+    }
+}
+
+.npc {
+    &.hidden {
+        visibility: hidden;
+    }
+
+    &.rooster {
+        height: 26px;
+        &.down {
+            @include sprite_animation('#{$sprite_base}/characters/Rooster/Rooster_front.png', 10, 26px, rooster_front_sprite);
+        }
+    }
+            
+    &.BroBot_red {
+        height: 76px;
+        
+        &.up {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Brobot/Brobot_red/Brobot_red_back.png', 16, 76px, Brobot_red_back_sprite);
+        }
+        
+        &.down {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Brobot/Brobot_red/Brobot_red_front.png', 16, 76px, Brobot_red_front_sprite);
+        }
+
+        &.left {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Brobot/Brobot_red/Brobot_red_side.png', 16, 76px, Brobot_red_side_sprite);
+        }
+
+        &.right {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Brobot/Brobot_red/Brobot_red_side.png', 16, 76px, Brobot_red_side_sprite);
+            transform: scaleX(-1);
+            //transform : rotate (15deg)
+        }
+    }
+    &.BroBot_grey {
+        height: 76px;
+        
+        &.up {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Brobot/Brobot_grey/Brobot_grey_back.png', 16, 76px, Brobot_grey_back_sprite);
+        }
+        
+        &.down {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Brobot/Brobot_grey/Brobot_grey_front.png', 16, 76px, Brobot_grey_front_sprite);
+        }
+    }
+        
+    &.broker_red {
+        height: 74px;
+        //transform: rotateX(120deg);
+        &.up {
+            @include sprite_animation('#{$sprite_base}/characters/Brokers/Red/broker_red_back.png', 7, 76px, broker_back_sprite);
+        }
+        
+        &.down {
+            @include sprite_animation('#{$sprite_base}/characters/Brokers/Red/broker_red_front.png', 7, 76px, broker_front_sprite);
+        }
+    }
+    &.broker_blue {
+        height: 74px;
+        //transform: rotateX(120deg);
+        &.up {
+            @include sprite_animation('#{$sprite_base}/characters/Brokers/Blue/broker_blue_back.png', 7, 76px, broker_grey_back_sprite);
+        }
+        
+        &.down {
+            @include sprite_animation('#{$sprite_base}/characters/Brokers/Blue/broker_blue_front.png', 7, 76px, broker_grey_front_sprite);
+        }
+    }
+     &.broker_yellow {
+        height: 74px;
+        //transform: rotateX(120deg);
+        &.up {
+            @include sprite_animation('#{$sprite_base}/characters/Brokers/yellow/broker_yellow_back.png', 7, 76px, broker_brown_back_sprite);
+        }
+        
+        &.down {
+            @include sprite_animation('#{$sprite_base}/characters/Brokers/yellow/broker_yellow_front.png', 7, 76px, broker_brown_front_sprite);
+        }
+    }
+    &.broker_pink {
+        height: 74px;
+        //transform: rotateX(120deg);
+        &.up {
+            @include sprite_animation('#{$sprite_base}/characters/Brokers/pink/broker_pink_back.png', 7, 76px, broker_brown1_back_sprite);
+        }
+        
+        &.down {
+            @include sprite_animation('#{$sprite_base}/characters/Brokers/pink/broker_pink_front.png', 7, 76px, broker_brown1_front_sprite);
+        }
+    }
+
+    &.Wood_Chipper {
+        height: 64px;
+        &.up {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Wood_Chipper/Wood_Chipper_back.png', 4, 64px, Wood_Chipper_back_sprite);
+         
+        }
+        
+        &.down {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Wood_Chipper/Wood_Chipper_front.png', 4, 64px, Wood_Chipper_front_sprite);
+      
+        }
+
+        &.left {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Wood_Chipper/Wood_Chipper_left.png', 4, 64px, Wood_Chipper_left_sprite);
+        }
+
+        &.right {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Wood_Chipper/Wood_Chipper_left.png', 4, 64px, Wood_Chipper_left_sprite);
+            transform: scaleX(-1);        }
+    }
+    &.The_Brock {
+        height: 72px;
+        
+        &.up {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/The_Brock/The_Brock_back.png', 32, 76px, The_Brock_back_sprite);
+        }
+        
+        &.down {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/The_Brock/The_Brock_front.png', 32, 76px, The_Brock_front_sprite);
+        }
+
+        &.left {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/The_Brock/The_Brock_left.png', 32, 76px, The_Brock_left_sprite);
+        }
+
+        &.right {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/The_Brock/The_Brock_left.png', 32, 76px, The_Brock_left_sprite);
+
+            transform: scaleX(-1);
+        }
+    }
+    &.Chocolate_Drip_white {
+        height: 64px;
+        
+        &.up {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Chocolate_Drip/Chocolate_Drip_White/Chocolate_Drip_white_back.png', 6, 64px, Chocolate_Drip_White_back_sprite);
+        }
+        
+        &.down {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Chocolate_Drip/Chocolate_Drip_White/Chocolate_Drip_white_front.png', 5, 64px, Chocolate_Drip_White_front_sprite);
+        }
+
+        &.left {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Chocolate_Drip/Chocolate_Drip_White/Chocolate_Drip_white_left.png', 4, 64px, Chocolate_Drip_White_left_sprite, 0.3s);
+        }
+
+        &.right {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Chocolate_Drip/Chocolate_Drip_White/Chocolate_Drip_white_left.png', 4, 64px, Chocolate_Drip_White_right_sprite, 0.3s);
+            transform: scaleX(-1);
+        }
+    }
+    &.Chocolate_Drip_black {
+        height: 64px;
+        
+        &.up {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Chocolate_Drip/Chocolate_Drip_Black/Chocolate_Drip_black_back.png', 6, 64px, Chocolate_Drip_black_back_sprite);
+        }
+        
+        &.down {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Chocolate_Drip/Chocolate_Drip_Black/Chocolate_Drip_black_front.png', 5, 64px, Chocolate_Drip_black_front_sprite);
+        }
+
+        &.left {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Chocolate_Drip/Chocolate_Drip_Black/Chocolate_Drip_black_left.png', 4, 64px, Chocolate_Drip_black_left_sprite);
+        }
+
+        &.right {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Chocolate_Drip/Chocolate_Drip_Black/Chocolate_Drip_black_left.png', 4, 64px, Chocolate_Drip_black_left_sprite);
+            transform: scaleX(-1);
+        }
+    }
+    &.Boorilla {
+
+        &.down {
+            height: 74px;
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Boorilla/Boorilla_front.png', 15, 64px, Boorilla_front_sprite);
+        }
+
+        &.left {
+            height: 76px;
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Boorilla/Boorilla_left.png', 15, 76px, Boorilla_left_sprite);
+        }
+
+        &.right {
+            height: 76px;
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Boorilla/Boorilla_left.png', 15, 76px, Boorilla_right_sprite);
+
+            transform: scaleX(-1);
+        }
+    }
+ 
+    &.Meloosa {
+        height: 64px;
+        
+        &.up {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Meloosa/Meloosa_back.png', 3, 64px, Meloosa_back_sprite);
+        }
+        
+        &.down {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Meloosa/Meloosa_front.png', 3, 64px, Meloosa_front_sprite);
+        }
+
+        &.left {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Meloosa/Meloosa_left.png', 3, 64px, Meloosa_left_sprite);
+        }
+
+        &.right {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Meloosa/Meloosa_left.png', 3, 64px, Meloosa_left_sprite);
+
+            transform: scaleX(-1);
+        }
+    }
+    &.Whino {
+        height: 68px;
+        
+        &.up {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Whino/Whino_back.png', 6, 80px, Whino_back_sprite);
+        }
+        
+        &.down {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Whino/Whino_front.png', 6, 80px, Whino_front_sprite);
+        }
+
+        &.left {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Whino/Whino_left.png', 6, 80px, Whino_left_sprite);
+        }
+
+        &.right {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Whino/Whino_left.png', 6, 80px, Whino_left_sprite);
+
+            transform: scaleX(-1);
+        }
+    }
+    &.Cotton_Eye_Joe {
+        height: 64px;
+        
+        &.up {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Cotton_Eye_Joe/Cotton_Eye_Joe_back.png', 4, 64px, Cotton_Eye_Joe_back_sprite);
+        }
+        
+        &.down {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Cotton_Eye_Joe/Cotton_Eye_Joe_front.png', 4, 64px, Cotton_Eye_Joe_front_sprite);
+        }
+
+        &.left {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Cotton_Eye_Joe/Cotton_Eye_Joe_left.png', 4, 64px, Cotton_Eye_Joe_left_sprite);
+        }
+
+        &.right {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Cotton_Eye_Joe/Cotton_Eye_Joe_left.png', 4, 64px, Cotton_Eye_Joe_left_sprite);
+
+            transform: scaleX(-1);
+        }
+    }
+     &.Trololo {
+        
+        
+        &.up {
+            height: 121px;
+            @include sprite_animation('#{$sprite_base}/characters/MainCharacters/Trololo/Trololo_back.png', 11, 75px, Trololo_back_sprite);
+        }
+        
+        &.down {
+            height: 121px;
+            @include sprite_animation('#{$sprite_base}/characters/MainCharacters/Trololo/Trololo_front.png', 11, 75px, Trololo_front_sprite);
+        }
+
+        &.left {
+            height: 121px;
+            @include sprite_animation('#{$sprite_base}/characters/MainCharacters/Trololo/Trololo_Side.png', 8, 75px, Trololo_left_sprite);
+        }
+
+        &.right {
+            height: 121px;
+            @include sprite_animation('#{$sprite_base}/characters/MainCharacters/Trololo/Trololo_Side.png', 8, 75px, Trololo_right_sprite);
+
+            transform: scaleX(-1);
+        }
+    }
+    &.Dino {
+        height: 80px;
+    
+
+        &.left {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Dino/dino_left.png', 20, 112px, dino_left_sprite, 0.155s);
+        }
+
+        &.right {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Dino/dino_left.png', 20, 112px, dino_right_sprite, 0.155s);
+            transform: scaleX(-1);
+        }
+    }
+    &.Monocole {
+        height: 76px;
+
+
+        &.left {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Monocole/monocole_left.png', 22, 82px, monocole_left_sprite);
+        }
+
+        &.right {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Monocole/monocole_left.png', 22, 82px, monocole_left_sprite);
+            transform: scaleX(-1);
+        }
+    }
+    &.Wooch {
+        height: 80px;
+
+           /* &.up {
+            @include sprite_animation('#{$sprite_base}/characters/witch_back.png', 31, 32px, witch_back_sprite);
+        }
+        
+        &.down {
+            @include sprite_animation('#{$sprite_base}/characters/witch_front.png', 32, 32px, witch_front_sprite);
+        }*/
+
+        &.left {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Wooch/wooch_left.png', 32, 64px, wooch_left_sprite);
+        }
+
+        &.right {
+            @include sprite_animation('#{$sprite_base}/characters/Duels/Wooch/wooch_left.png', 32, 64px, wooch_left_sprite);
+            transform: scaleX(-1);
+        }
+    }
+
+    &.trader {
+        
+        &.green {
+            height: 66px;
+            &.up {
+                @include sprite_animation('#{$sprite_base}/characters/Traders/triangle/green/trader1_green_back.png', 11, 70px, trader1_green_back_sprite);
+            }
+            
+            &.down {
+                @include sprite_animation('#{$sprite_base}/characters/Traders/triangle/green/trader1_green_front.png', 11, 70px, trader1_green_front_sprite);
+            }
+    
+            &.left {
+                @include sprite_animation('#{$sprite_base}/characters/Traders/triangle/green/trader1_green_left.png', 11, 70px, trader1_green_left_sprite);
+            }
+    
+            &.right {
+                @include sprite_animation('#{$sprite_base}/characters/Traders/triangle/green/trader1_green_left.png', 11, 70px, trader1_green_left_sprite);
+                transform: scaleX(-1);
+            }
+        }
+
+        &.green2 {
+            &.up {
+                height: 68px;
+                @include sprite_animation('#{$sprite_base}/characters/Traders/square/green/trader2_green_back.png', 14, 72px, trader2_green_back_sprite);
+            }
+            
+            &.down {
+                height: 70px;
+                @include sprite_animation('#{$sprite_base}/characters/Traders/square/green/trader2_green_front.png', 13, 72px, trader2_green_front_sprite);
+            }
+    
+            &.left {
+                height: 70px;
+                @include sprite_animation('#{$sprite_base}/characters/Traders/square/green/trader2_green_left.png', 14, 72px, trader2_green_left_sprite);
+            }
+    
+            &.right {
+                height: 70px;
+                @include sprite_animation('#{$sprite_base}/characters/Traders/square/green/trader2_green_left.png', 14, 72px, trader2_green_left_sprite);
+                transform: scaleX(-1);
+            }
+        }
+
+        &.blue {
+            height: 66px;
+            &.up {
+                @include sprite_animation('#{$sprite_base}/characters/Traders/triangle/blue/trader1_blue_back.png', 11, 70px, trader1_blue_back_sprite);
+            }
+            
+            &.down {
+                @include sprite_animation('#{$sprite_base}/characters/Traders/triangle/blue/trader1_blue_front.png', 9, 70px, trader1_blue_front_sprite);
+            }
+
+            &.left {
+                @include sprite_animation('#{$sprite_base}/characters/Traders/triangle/blue/trader1_blue_left.png', 11, 70px, trader1_blue_left_sprite);
+            }
+
+            &.right {
+                @include sprite_animation('#{$sprite_base}/characters/Traders/triangle/blue/trader1_blue_left.png', 11, 70px, trader1_blue_left_sprite);
+                transform: scaleX(-1);
+            }
+        }
+
+        &.blue2 {
+            &.up {
+                height: 68px;
+                @include sprite_animation('#{$sprite_base}/characters/Traders/square/blue/trader2_blue_back.png', 14, 72px, trader2_blue_back_sprite);
+            }
+            
+            &.down {
+                height: 70px;
+                @include sprite_animation('#{$sprite_base}/characters/Traders/square/blue/trader2_blue_front.png', 13, 72px, trader2_blue_front_sprite);
+            }
+    
+            &.left {
+                height: 70px;
+                @include sprite_animation('#{$sprite_base}/characters/Traders/square/blue/trader2_blue_left.png', 14, 72px, trader2_blue_left_sprite);
+            }
+    
+            &.right {
+                height: 70px;
+                @include sprite_animation('#{$sprite_base}/characters/Traders/square/blue/trader2_blue_left.png', 14, 72px, trader2_blue_left_sprite);
+                transform: scaleX(-1);
+            }
+        }
+
+        &.black {
+            height: 66px;
+            &.up {
+                @include sprite_animation('#{$sprite_base}/characters/Traders/triangle/black/trader1_black_back.png', 11, 62px, trader1_black_back_sprite);
+              //  transform: rotate(20deg);
+            }                  
+            &.down {
+                @include sprite_animation('#{$sprite_base}/characters/Traders/triangle/black/trader1_black_front.png', 11, 62px, trader1_black_front_sprite);
+            }
+            &.left {
+                @include sprite_animation('#{$sprite_base}/characters/Traders/triangle/black/trader1_black_left.png', 11, 62px, trader1_black_left_sprite);
+            }
+    
+            &.right {
+                @include sprite_animation('#{$sprite_base}/characters/Traders/triangle/black/trader1_black_left.png', 11, 62px, trader1_black_left_sprite);
+                transform: scaleX(-1);
+              //  transform: rotate(20deg);
+            }
+        }
+
+        &.black2 {
+            &.up {
+                height: 68px;
+                @include sprite_animation('#{$sprite_base}/characters/Traders/square/black/trader2_black_back.png', 14, 72px, trader2_black_back_sprite);
+            }
+            &.down {
+                height: 70px;
+                @include sprite_animation('#{$sprite_base}/characters/Traders/square/black/trader2_black_front.png', 13, 72px, trader2_black_front_sprite);
+            }
+            &.left {
+                height: 70px;
+                @include sprite_animation('#{$sprite_base}/characters/Traders/square/black/trader2_black_left.png', 14, 72px, trader2_black_left_sprite);
+            }
+    
+            &.right {
+                height: 70px;
+                @include sprite_animation('#{$sprite_base}/characters/Traders/square/black/trader2_black_left.png', 14, 72px, trader2_black_left_sprite);
+                transform: scaleX(-1);
+                transform: rotate(20deg);
+            }
+        }
+
+        &.purple {
+            height: 66px;
+            &.up {
+                @include sprite_animation('#{$sprite_base}/characters/Traders/triangle/purple/trader1_purple_back.png', 11, 70px, trader1_purple_back_sprite);
+            }
+            
+            &.down {
+                @include sprite_animation('#{$sprite_base}/characters/Traders/triangle/purple/trader1_purple_front.png', 9, 70px, trader1_purple_front_sprite);
+            }
+
+            &.left {
+                @include sprite_animation('#{$sprite_base}/characters/Traders/triangle/purple/trader1_purple_left.png', 11, 70px, trader1_purple_left_sprite);
+            }
+
+            &.right {
+                @include sprite_animation('#{$sprite_base}/characters/Traders/triangle/purple/trader1_purple_left.png', 11, 70px, trader1_purple_left_sprite);
+                transform: scaleX(-1);
+            }
+        }
+
+        &.purple2 {
+            &.up {
+                height: 68px;
+                @include sprite_animation('#{$sprite_base}/characters/Traders/square/purple/trader2_purple_back.png', 14, 72px, trader2_purple_back_sprite);
+            }
+            
+            &.down {
+                height: 70px;
+                @include sprite_animation('#{$sprite_base}/characters/Traders/square/purple/trader2_purple_front.png', 13, 72px, trader2_purple_front_sprite);
+            }
+
+            &.left {
+                height: 70px;
+                @include sprite_animation('#{$sprite_base}/characters/Traders/square/purple/trader2_purple_left.png', 14, 72px, trader2_purple_left_sprite);
+            }
+
+            &.right {
+                height: 70px;
+                @include sprite_animation('#{$sprite_base}/characters/Traders/square/purple/trader2_purple_left.png', 14, 72px, trader2_purple_left_sprite);
+                transform: scaleX(-1);
+            }
+        }
+    }
+
+    &.arena_master {
+
+        &.red {
+
+            height: 68px;
+
+            &.up {
+                @include sprite_animation('#{$sprite_base}/characters/ArenaMasters/ArenaMaster_Red/AM_red_back.png', 15, 72px, arena_master_red_back_sprite);
+            }
+            
+            &.down {
+                @include sprite_animation('#{$sprite_base}/characters/ArenaMasters/ArenaMaster_Red/AM_red_front.png', 13, 72px, arena_master_red_front_sprite);
+            }
+
+            &.left {
+                @include sprite_animation('#{$sprite_base}/characters/ArenaMasters/ArenaMaster_Red/AM_red_side.png', 7, 72px, arena_master_red_side_sprite);
+            }
+
+            &.right {
+                @include sprite_animation('#{$sprite_base}/characters/ArenaMasters/ArenaMaster_Red/AM_red_side.png', 7, 72px, arena_master_red_side_sprite);
+                transform: scaleX(-1);
+            }
+        }
+
+        &.blue {
+
+            height: 68px;
+
+            &.up {
+                @include sprite_animation('#{$sprite_base}/characters/ArenaMasters/ArenaMaster_Blue/AM_blue_back.png', 15, 72px, arena_master_blue_back_sprite);
+            }
+            
+            &.down {
+                @include sprite_animation('#{$sprite_base}/characters/ArenaMasters/ArenaMaster_Blue/AM_blue_front.png', 13, 72px, arena_master_blue_front_sprite);
+            }
+
+            &.left {
+                @include sprite_animation('#{$sprite_base}/characters/ArenaMasters/ArenaMaster_Blue/AM_blue_side.png', 7, 72px, arena_master_blue_side_sprite);
+            }
+
+            &.right {
+                @include sprite_animation('#{$sprite_base}/characters/ArenaMasters/ArenaMaster_Blue/AM_blue_side.png', 7, 72px, arena_master_blue_side_sprite);
+                transform: scaleX(-1);
+            }
+        }
+        &.yellow {
+
+            height: 68px;
+
+            &.up {
+                @include sprite_animation('#{$sprite_base}/characters/ArenaMasters/ArenaMaster_Yellow/AM_yellow_back.png', 15, 72px, arena_master_yellow_back_sprite);
+            }
+            
+            &.down {
+                @include sprite_animation('#{$sprite_base}/characters/ArenaMasters/ArenaMaster_Yellow/AM_yellow_front.png', 13, 72px, arena_master_yellow_front_sprite);
+            }
+
+            &.left {
+                @include sprite_animation('#{$sprite_base}/characters/ArenaMasters/ArenaMaster_Yellow/AM_yellow_left.png', 7, 72px, arena_master_yellow_side_sprite);
+            }
+
+            &.right {
+                @include sprite_animation('#{$sprite_base}/characters/ArenaMasters/ArenaMaster_Yellow/AM_yellow_right.png', 7, 72px, arena_master_yellow_side_sprite);
+                transform: scaleX(-1);
+            }
+        }
+        &.pink {
+            height: 68px;
+            &.up {
+                @include sprite_animation('#{$sprite_base}/characters/ArenaMasters/ArenaMaster_Pink/AM_pink_back.png', 15, 72px, arena_master_pink_back_sprite);
+            }
+            
+            &.down {
+                @include sprite_animation('#{$sprite_base}/characters/ArenaMasters/ArenaMaster_Pink/AM_pink_front.png', 13, 72px, arena_master_pink_front_sprite);
+            }
+
+            &.left {
+                @include sprite_animation('#{$sprite_base}/characters/ArenaMasters/ArenaMaster_Pink/AM_pink_right.png', 7, 78px, arena_master_pink_left_sprite);
+                transform: scaleX(-1);
+            }
+
+            &.right {
+                @include sprite_animation('#{$sprite_base}/characters/ArenaMasters/ArenaMaster_Pink/AM_pink_right.png', 7, 78px, arena_master_pink_right_sprite);
+            }
+        }
+    }
+}
+
+@font-face {
+    font-family: Munro;
+    src: url('#{$font_base}/munro.ttf');
+}
+
+@font-face {
+    font-family: MunroSmall;
+    src: url('#{$font_base}//munro-small.ttf');
+}
+
+@font-face {
+    font-family: PressStart2P;
+    src: url('#{$font_base}//PressStart2P-Regular.ttf');
+}
+
+@font-face {
+    font-family: LanaPixel;
+    src: url('#{$font_base}//LanaPixel.ttf');
+}
+
+
+#conversation {
+    z-index: 10000;
+    display: grid;
+    grid-template-columns: auto auto;
+
+    #conversation_text {
+        padding: 7px 12px;
+        width: 300px;
+        height: 90px;
+
+        .word {
+            display: inline-block;
+            margin: 0 3px;
+            
+            &.highlighted {
+                color: #f4c845;
+            }
+        }
+    }
+
+    #conversation_buttons {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #conversation_arrow {
+        width: 14px;
+        height: 12px;
+        position: absolute;
+        bottom: 20px;
+        right: 20px;
+        background: url('#{$sprite_base}/ui/scroll-down_x2.png') no-repeat;
+
+        animation-duration: 1s;
+        animation-name: conversation_arrow;
+        animation-iteration-count: infinite;
+        animation-direction: alternate;
+
+        @keyframes conversation_arrow {
+            from { bottom: 20px; }
+            to { bottom: 25px; }
+        }
+    }
+}
+
+.profile_picture {
+    width: 128px;
+    height: 128px;
+    
+    &.rooster {
+        background: url('#{$sprite_base}/ui/text_boxes/rooster_64_x2.png') no-repeat;
+    }
+    &.Crusty {
+        background: url('#{$sprite_base}/ui/text_boxes/Crusty_64.png') no-repeat;
+    }
+    &.Rusty {
+        background: url('#{$sprite_base}/ui/text_boxes/Rusty_64.png') no-repeat;
+    }
+    &.Cotton_Eye_Joe {
+        background: url('#{$sprite_base}/ui/text_boxes/Cotton_Eye_Joe_64_.png') no-repeat;
+    }
+    &.BroBot_red {
+        background: url('#{$sprite_base}/ui/text_boxes/Brobot_red_64.png') no-repeat;
+    }
+    &.BroBot_grey {
+        background: url('#{$sprite_base}/ui/text_boxes/Brobot_grey_64.png') no-repeat;
+    }
+    
+    &.Wood_Chipper {
+        background: url('#{$sprite_base}/ui/text_boxes/Wood_Chipper_64.png') no-repeat;
+    }
+    &.The_Brock {
+        background: url('#{$sprite_base}/ui/text_boxes/The_Brock_64.png') no-repeat;
+    }
+    &.Chocolate_Drip_white {
+        background: url('#{$sprite_base}/ui/text_boxes/Chocolate_Drip_64.png') no-repeat;
+    }
+    &.Chocolate_Drip_black {
+        background: url('#{$sprite_base}/ui/text_boxes/Chocolate_Drip_black_64.png') no-repeat;
+    }
+    &.Boorilla {
+        background: url('#{$sprite_base}/ui/text_boxes/Boorilla_64.png') no-repeat;
+    }
+    &.Meloosa {
+        background: url('#{$sprite_base}/ui/text_boxes/Meloosa_64.png') no-repeat;
+    }
+    &.Whino {
+        background: url('#{$sprite_base}/ui/text_boxes/Whino_64.png') no-repeat;
+    }
+    &.Trololo {
+        background: url('#{$sprite_base}/ui/text_boxes/Trololo_64.png') no-repeat;
+    }
+    &.Dino {
+        background: url('#{$sprite_base}/ui/text_boxes/dino_64.png') no-repeat;
+    }
+    &.Wooch {
+        background: url('#{$sprite_base}/ui/text_boxes/wooch_64.png') no-repeat;
+    }
+    &.Monocole {
+        background: url('#{$sprite_base}/ui/text_boxes/monocole_64.png') no-repeat;  
+    }
+
+    &.broker_red {
+        background: url('#{$sprite_base}/ui/text_boxes/broker_red_64_x2.png') no-repeat;      
+    }
+    &.broker_blue {
+        background: url('#{$sprite_base}/ui/text_boxes/broker_blue_64_x2.png') no-repeat; 
+    }
+    &.broker_pink {
+        background: url('#{$sprite_base}/ui/text_boxes/broker_pink_64_x2.png') no-repeat; 
+    }
+    &.broker_yellow {
+        background: url('#{$sprite_base}/ui/text_boxes/broker_yellow_64_x2.png') no-repeat; 
+    }
+
+    &.arena_master {    
+        &.red {
+            background: url('#{$sprite_base}/ui/text_boxes/master_red_64_x2.png') no-repeat;
+        }
+        &.blue {
+            background: url('#{$sprite_base}/ui/text_boxes/master_blue_64_x2.png') no-repeat;
+        }
+        &.yellow {
+            background: url('#{$sprite_base}/ui/text_boxes/master_yellow_64_x2.png') no-repeat;
+        }
+        &.pink {
+            background: url('#{$sprite_base}/ui/text_boxes/master_pink_64_x2.png') no-repeat;
+        }
+    }
+
+    &.trader {  
+        &.black2 {
+            background: url('#{$sprite_base}/ui/text_boxes/trader_square_black_64_x2.png') no-repeat;
+        }
+        &.blue2 {
+            background: url('#{$sprite_base}/ui/text_boxes/trader_square_blue_64_x2.png') no-repeat;
+        }
+        &.green2 {
+            background: url('#{$sprite_base}/ui/text_boxes/trader_square_green_64_x2.png') no-repeat;
+        }
+        &.purple2 {
+            background: url('#{$sprite_base}/ui/text_boxes/trader_square_purple_64_x2.png') no-repeat;
+        }
+        
+        &.black {
+            background: url('#{$sprite_base}/ui/text_boxes/trader_triangular_black_64_x2.png') no-repeat;
+        }
+        &.blue {
+            background: url('#{$sprite_base}/ui/text_boxes/trader_triangular_blue_64_x2.png') no-repeat;
+        }
+        &.green {
+            background: url('#{$sprite_base}/ui/text_boxes/trader_triangular_green_64_x2.png') no-repeat;
+        }
+        &.purple {
+            background: url('#{$sprite_base}/ui/text_boxes/trader_triangular_purple_64_x2.png') no-repeat;
+        }
+    }
+}
+
+#window_container {
+    z-index: 20000;
+    position: fixed !important;
+    width: 100%;
+    height: calc(100% - 66px);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.bordered_window {
+    border: 12px solid #f4c845;
+    border-image: url('#{$sprite_base}/ui/gui-txt_window_x2.png') 12 12 round;
+    background: #222034;
+}
+
+.button {
+    border: 5px solid #f4c845;
+    border-image: url('#{$sprite_base}/ui/btn_no.png') 5 5 round;
+    background: #222034;
+
+    &.white {
+        border-image: url('#{$sprite_base}/ui/btn_white.png') 5 5 round;
+    }
+
+    margin: 5px;
+    padding: 0 5px 3px 6px;
+    display: inline-block;
+
+    &.disabled {
+        color: #666670;
+    }
+
+    &:hover:not(.disabled) {
+        transform: translateY(1px);
+        cursor: url('#{$sprite_base}/ui/cursor_pointer.png'), pointer;
+    }
+
+    &.selected {
+        color: #f4c845;
+        // TODO: add colorful border as well
+    }
+}
+
+#credits_window {
+    padding: 0 40px;
+
+    dt, dd {
+        font-family: LanaPixel;
+        line-height: 22px;
+    }
+    dt {
+        margin-top: 13px;
+    }
+}
+
+$pending_window_width: 800px;
+$pending_window_height: 600px;
+#pending_window {
+    width: $pending_window_width;
+    height: $pending_window_height;
+
+    #pending_duel_offer {
+        font-weight: normal;
+        
+        >* {
+            display: flex;
+            align-items: center;
+        }
+
+        .item_icon {
+            margin: 5px;;
+        }
+    }
+}
+
+#trade_window {
+    .droppable {
+        margin: 2px;
+        background: #534d7c;
+
+        &.draggingOver {
+            background: lightblue;
+        }
+    }
+}
+
+#trade_window, #find_duel_window {
+    display: grid;
+    grid-template-columns: 128px 800px;
+
+    #left_sidebar {
+        grid-template-rows: 128px auto;
+        display: grid;
+    }
+
+    #right_sidebar {
+        display: grid;
+        grid-template-columns: auto;
+        grid-template-rows: auto;
+        padding: 5px 13px;
+    }
+
+    .bottom {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+    }
+
+    [data-rbd-droppable-id="offers_-1"], [data-rbd-droppable-id="desires_-1"] {
+        background-color: transparent;
+
+        &.draggingOver {
+            background: #534d7c;
+        }
+    }
+
+    .draggable {
+        width: 46px;
+        height: 46px;
+        margin: 3px;
+        user-select: none;
+        line-height: 12px;
+
+        display: grid;
+        grid-template-columns: 32px auto;
+        justify-items: center;
+        align-items: center;
+        cursor: url('#{$sprite_base}/ui/cursor_drag.png') 16 19, grab;
+
+        .hidden_btns {
+            color: #f4c845;
+            visibility: hidden;
+            margin-top: -2px;
+
+            a {
+                padding: 3px;
+                margin: 1px;
+                cursor: url('#{$sprite_base}/ui/cursor_pointer.png'), pointer;
+            }
+        }
+        &:hover .hidden_btns {
+            visibility: visible;
+        }
+    }
+
+    #all_items {
+        grid-column-start: 1;
+        grid-column-end: end;
+
+        .draggable {
+            width: 32px;
+            height: 32px;
+            display: inline-block;
+            margin: 5px;
+        }
+    }
+
+    .button {
+        margin: 0 0 5px 0;
+        width: 82px;
+        text-align: center;
+    }
+}
+
+.dragging_item {
+    font-size: 10px;
+    margin: 5px;
+    user-select: none;
+    line-height: 12px;
+    z-index: 30000 !important;
+}
+
+$side_width: 80px;
+$reaction_width: 256px;
+$player_card_width: $side_width + $reaction_width;
+$duel_item_width: 240px;
+$duel_window_width: 2 * $player_card_width + 2 * $duel_item_width;
+$duel_window_height: 550px;
+$duel_window_outer_width: 1232px;
+$duel_window_outer_height: 740px;
+#duel_window {
+    width: $duel_window_width;
+    height: $duel_window_height;
+
+    background-image: url('#{$sprite_base}/ui/duel/fight - bg frame/bg-frame_1232x740.png');
+
+    display: grid;
+    grid-template-columns: $player_card_width $duel_item_width $duel_item_width $player_card_width;
+    padding: ($duel_window_outer_height - $duel_window_height)/2 ($duel_window_outer_width - $duel_window_width)/2;
+
+    color: #f4c845;
+
+    .rtl {
+        direction: rtl;
+    }
+
+    .inventory_item {
+        margin-bottom: 42px;
+        .amount {
+            color: #211d11;
+        }
+    }
+
+    .description {
+        font-size: 14px;
+        color: #d4d4d4;
+    }
+
+    .player_card {
+        display: grid;
+        grid-template-columns: $side_width $reaction_width;
+
+        .side {
+            background-repeat: no-repeat;
+            background-position-y: 330px;
+            background-position-x: center;
+            &.attack {
+                background-image: url('#{$sprite_base}/ui/duel/fight - icons/attack_32.png');
+            }
+            &.defence {
+                background-image: url('#{$sprite_base}/ui/duel/fight - icons/defense_32.png');
+            }
+
+            .button {
+                margin-top: 415px;
+            }
+        }
+    }
+
+    .bar {
+        .icon {
+            width: 42px;
+            height: 40px;
+            display: inline-block;
+        }
+
+        &.trollerance .icon {
+            background-image: url('#{$sprite_base}/ui/duel/fight - bars icons/heart_x2.png');
+        }
+
+        &.energy .icon {
+            background-image: url('#{$sprite_base}/ui/duel/fight - bars icons/light_x2.png');
+        }
+
+        .value {
+            width: 208px;
+            height: 40px;
+            display: inline-block;
+        }
+
+        @for $i from 0 through 10 {
+            &.trollerance .value-#{$i} {
+                background-image: url('#{$sprite_base}/ui/duel/fight - bars/trollerance/trollerance_bar_left#{$i+1}.png');
+            }
+
+            &.energy .value-#{$i} {
+                background-image: url('#{$sprite_base}/ui/duel/fight - bars/energy/energy_bar_left11.png');
+                background-image: url('#{$sprite_base}/ui/duel/fight - bars/energy/energy_bar_left#{$i+1}.png');
+            }
+        }
+    }
+
+    .reaction {
+        height: 256px;
+        width: 256px;
+        display: inline-block;
+        margin-top: 20px;
+
+        &.infinite {
+            animation-iteration-count: infinite !important;
+        }
+
+        &.Crusty {
+            background-image: url('#{$sprite_base}/characters/Reactions/Crusty/Crusty_Idle_128-spritesheet_x2.png');
+
+            &.blink {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Crusty/Crusty_Blink_128-spritesheet_x2.png', 12, $reaction_width, Crusty_blink_sprite);
+            }
+
+            &.cry {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Crusty/Crusty_Cry_128-spritesheet_x2.png', 15, $reaction_width, Crusty_cry_sprite);
+            }
+
+            &.hipnotic {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Crusty/Crusty_Hipnotic_128-spritesheet_x2.png', 17, $reaction_width, Crusty_hipnotic_sprite);
+            }
+
+            &.sleepy {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Crusty/Crusty_Sleepy_128-spritesheet_x2.png', 21, $reaction_width, Crusty_sleepy_sprite);
+            }
+
+            &.stinky {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Crusty/Crusty_Stinky_128-spritesheet_x2.png', 13, $reaction_width, Crusty_stinky_sprite);
+            }
+
+            &.sugarrush {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Crusty/Crusty_Sugerrush_128-spritesheet_x2.png', 22, $reaction_width, Crusty_sugarrush_sprite);
+            }
+
+            &.loud {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Crusty/Crusty_TooLoud_128-spritesheet_x2.png', 13, $reaction_width, Crusty_loud_sprite);
+            }
+
+            &.win {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Crusty/Crusty_Win_128-spritesheet_x2.png', 21, $reaction_width, Crusty_win_sprite);
+            }
+
+        }
+
+        &.Cotton_Eye_Joe {
+            background-image: url('#{$sprite_base}/characters/Reactions/Cotton_Eye_Joe/Cotton_Eye_Joe_Idle_128-spritesheet_x2.png');
+
+            &.blink {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Cotton_Eye_Joe/Cotton_Eye_Joe_Blink_128-spritesheet_x2.png', 15, $reaction_width, Cotton_Eye_Joe_blink_sprite);
+            }
+
+            &.cry {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Cotton_Eye_Joe/Cotton_Eye_Joe_Cry_128-spritesheet_x2.png', 23, $reaction_width, Cotton_Eye_Joe_cry_sprite);
+            }
+
+            &.hipnotic {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Cotton_Eye_Joe/Cotton_Eye_Joe_Hipnotic_128-spritesheet_x2.png', 22, $reaction_width, Cotton_Eye_Joe_hipnotic_sprite);
+            }
+
+            &.sleepy {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Cotton_Eye_Joe/Cotton_Eye_Joe_Sleepy_128-spritesheet_x2.png', 23, $reaction_width, Cotton_Eye_Joe_sleepy_sprite);
+            }
+
+            &.stinky {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Cotton_Eye_Joe/Cotton_Eye_Joe_Stinky_128-spritesheet_x2.png', 20, $reaction_width, Cotton_Eye_Joe_stinky_sprite);
+            }
+
+            &.sugarrush {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Cotton_Eye_Joe/Cotton_Eye_Joe_Sugerrush_128-spritesheet_x2.png', 23, $reaction_width, Cotton_Eye_Joe_sugarrush_sprite);
+            }
+
+            &.loud {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Cotton_Eye_Joe/Cotton_Eye_Joe_TooLoud_128-spritesheet_x2.png', 23, $reaction_width, Cotton_Eye_Joe_loud_sprite);
+            }
+   
+            &.win {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Cotton_Eye_Joe/Cotton_Eye_Joe_Win_128-spritesheet_x2.png', 20, $reaction_width, Cotton_Eye_Joe_win_sprite);
+            }
+
+        }
+        &.Monocole {
+            background-image: url('#{$sprite_base}/characters/Reactions/Monocole/Monocole_Idle_128-spritesheet_x2.png');
+
+            &.blink {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Monocole/Monocole_Blink_128-spritesheet_x2.png', 25, $reaction_width, monocole_blink_sprite);
+            }
+
+            &.cry {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Monocole/Monocole_Cry_128-spritesheet_x2.png', 25, $reaction_width, monocole_cry_sprite);
+            }
+
+            &.hipnotic {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Monocole/Monocole_Hipnotic_128-spritesheet_x2.png', 25, $reaction_width, monocole_hipnotic_sprite);
+            }
+
+            &.sleepy {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Monocole/Monocole_Sleepy_128-spritesheet_x2.png', 25, $reaction_width, monocole_sleepy_sprite);
+            }
+
+            &.stinky {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Monocole/Monocole_Stinky_128-spritesheet_x2.png', 25, $reaction_width, monocole_stinky_sprite);
+            }
+
+            &.sugarrush {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Monocole/Monocole_Sugerrush_128-spritesheet_x2.png', 25, $reaction_width, monocole_sugarrush_sprite);
+            }
+
+            &.loud {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Monocole/Monocole_TooLoud_128-spritesheet_x2.png', 25, $reaction_width, Monocole_tooloud_sprite);
+            }
+        
+            &.win {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Monocole/Monocole_Win_128-spritesheet_x2.png', 25, $reaction_width, Monocole_win_sprite);
+            }
+
+
+        }
+        &.Meloosa {
+            background-image: url('#{$sprite_base}/characters/Reactions/Meloosa/Meloosa_Idle_128-spritesheet_x2.png');
+
+            &.blink {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Meloosa/Meloosa_blink_128-spritesheet_x2.png', 17, $reaction_width, Meloosa_blink_sprite);
+            }
+
+            &.cry {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Meloosa/Meloosa_Cry_128-spritesheet_x2.png', 12, $reaction_width, Meloosa_cry_sprite);
+            }
+
+            &.hipnotic {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Meloosa/Meloosa_Hipnotic_128-spritesheet_x2.png', 12, $reaction_width, Meloosa_hipnotic_sprite);
+            }
+
+            &.sleepy {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Meloosa/Meloosa_Sleepy_128-spritesheet_x2.png', 12, $reaction_width, Meloosa_sleepy_sprite);
+            }
+
+            &.stinky {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Meloosa/Meloosa_Stinky_128-spritesheet_x2.png', 12, $reaction_width, Meloosa_stinky_sprite);
+            }
+
+            &.sugarrush {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Meloosa/Meloosa_Sugerrush_128-spritesheet_x2.png', 12, $reaction_width, Meloosa_sugarrush_sprite);
+            }
+
+            &.loud {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Meloosa/Meloosa_TooLoud_128-spritesheet_x2.png', 16, $reaction_width, Meloosa_tooloud_sprite);
+            }
+   
+            &.win {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Meloosa/Meloosa_Win-Sheet.png', 16, $reaction_width, Meloosa_win_sprite);
+            }
+
+        }
+        &.Wood_Chipper {
+            background-image: url('#{$sprite_base}/characters/Reactions/Wood_Chipper/Wood_Chipper_Idle_128-spritesheet_x2.png');
+
+            &.blink {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Wood_Chipper/Wood_Chipper_Blink_128-spritesheet_x2.png', 12, $reaction_width, Wood_Chipper_blink_sprite);
+            }
+
+            &.cry {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Wood_Chipper/Wood_Chipper_Cry_128-spritesheet_x2.png', 12, $reaction_width, Wood_Chipper_cry_sprite);
+            }
+
+            &.hipnotic {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Wood_Chipper/Wood_Chipper_Hipnotic_128_spritesheet-x2.png', 12, $reaction_width, Wood_Chipper_hipnotic_sprite);
+            }
+
+            &.sleepy {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Wood_Chipper/Wood_Chipper_Sleepy_128-spritesheet_x2.png', 12, $reaction_width, Wood_Chipper_sleepy_sprite);
+            }
+
+            &.stinky {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Wood_Chipper/Wood_Chipper_Stinky_128-spritesheet_x2.png', 12, $reaction_width, Wood_Chipper_stinky_sprite);
+            }
+
+            &.sugarrush {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Wood_Chipper/Wood_Chipper_Sugarrush_128-spritesheet_x2.png', 12, $reaction_width, Wood_Chipper_sugarrush_sprite);
+            }
+
+            &.loud {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Wood_Chipper/Wood_Chipper_TooLoud_128-spritesheet_x2.png', 11, $reaction_width, Wood_Chipper_tooloud_sprite);
+            }
+    
+            &.win {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Wood_Chipper/Wood_Chipper_win_spritesheet_x2.png', 15, $reaction_width, Wood_Chipper_win_sprite);
+            }
+
+        }
+        &.Whino {
+            background-image: url('#{$sprite_base}/characters/Reactions/Whino/Whino_Idle_128-spritesheet_x2.png');
+
+            &.blink {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Whino/Whino_Blink_128-spritesheet_x2.png', 25, $reaction_width, Whino_blink_sprite);
+            }
+
+            &.cry {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Whino/Whino_Cry_128-spritesheet_x2.png', 24, $reaction_width, Whino_cry_sprite);
+            }
+
+            &.hipnotic {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Whino/Whino_Hipnotic_128-spritesheet_x2.png', 25, $reaction_width, Whino_hipnotic_sprite);
+            }
+
+            &.sleepy {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Whino/Whino_Sleepy_128-spritesheet_x2.png', 25, $reaction_width, Whino_sleepy_sprite);
+            }
+
+            &.stinky {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Whino/Whino_Stinky_128-spritesheet_x2.png', 22, $reaction_width, Whino_stinky_sprite);
+            }
+
+            &.sugarrush {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Whino/Whino_Sugerrush_128-spritesheet_x2.png', 25, $reaction_width, Whino_sugarrush_sprite);
+            }
+
+            &.loud {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Whino/Whino_TooLoud_128-spritesheet_x2.png', 23, $reaction_width, Whino_tooloud_sprite);
+            }
+    
+            &.win {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Whino/Whino_Win_128-spritesheet_x2.png', 25, $reaction_width, Whino_win_sprite);
+            }
+
+        }
+        &.Dino {
+            background-image: url('#{$sprite_base}/characters/Reactions/Dino/Dino_Idle_128-spritesheet_x2.png');
+
+            &.blink {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Dino/Dino_Blink_128-spritesheet_x2.png', 15, $reaction_width, dino_blink_sprite);
+            }
+
+            &.cry {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Dino/Dino_Cry_128-spritesheet_x2.png', 22, $reaction_width, dino_cry_sprite);
+            }
+
+            &.hipnotic {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Dino/Dino_Hipnotic_128-spritesheet_x2.png', 20, $reaction_width, dino_hipnotic_sprite);
+            }
+
+            &.sleepy {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Dino/Dino_Sleepy_128-spritesheet_x2.png', 21, $reaction_width, dino_sleepy_sprite);
+            }
+
+            &.stinky {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Dino/Dino_Stinky_128-spritesheet_x2.png', 18, $reaction_width, dino_stinky_sprite);
+            }
+
+            &.sugarrush {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Dino/Dino_Sugerrush_128-spritesheet_x2.png',24, $reaction_width, dino_sugarrush_sprite);
+            }
+
+            &.loud {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Dino/Dino_TooLoud_128-spritesheet_x2.png', 24, $reaction_width, dino_tooloud_sprite);
+            }
+
+            &.win {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Dino/Dino_Win_128-spritesheet_x2.png', 20, $reaction_width, dino_win_sprite);
+            }
+        }
+
+        &.Chocolate_Drip_white {
+            background-image: url('#{$sprite_base}/characters/Reactions/Chocolate_Drip/Chocolate_Drip_Idle_128-spritesheet_x2.png');
+
+            &.blink {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Chocolate_Drip/Chocolate_Drip_Blink_128-spritesheet_x2.png', 12, $reaction_width, Chocolate_Drip_blink_sprite);
+            }
+
+            &.cry {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Chocolate_Drip/Chocolate_Drip_Cry_128-Spritesheet_x2.png', 12, $reaction_width, Chocolate_Drip_sprite);
+            }
+
+            &.hipnotic {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Chocolate_Drip/Chocolate_Drip_Hipnotic_128-spritesheet_x2.png', 12, $reaction_width, Chocolate_Drip_hipnotic_sprite);
+            }
+
+            &.sleepy {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Chocolate_Drip/Chocolate_Drip_Sleepy_128-spritesheet_x2.png', 12, $reaction_width, Chocolate_Drip_sleepy_sprite);
+            }
+
+            &.stinky {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Chocolate_Drip/Chocolate_Drip_Stinky_128-spritesheet_x2.png', 12, $reaction_width, Chocolate_Drip_stinky_sprite);
+            }
+
+            &.sugarrush {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Chocolate_Drip/Chocolate_Drip_Sugerrush_128-spritesheet_x2.png',12, $reaction_width, Chocolate_Drip_sugarrush_sprite);
+            }
+
+            &.loud {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Chocolate_Drip/Chocolate_Drip_TooLoud_128-spritesheet_x2.png', 12, $reaction_width, Chocolate_Drip_tooloud_sprite);
+            }
+        
+            &.win {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Chocolate_Drip/Chocolate_Drip_Win-Sheet.png', 15, $reaction_width, Chocolate_Drip_win_sprite);
+            }
+        }
+
+        &.Boorilla {
+            background-image: url('#{$sprite_base}/characters/Reactions/Boorilla/Boorilla_Idle_128-spritesheet_x2.png');
+
+            &.blink {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Boorilla/Boorilla_Blink_128-spritesheet_x2.png', 6, $reaction_width, Boorilla_blink_sprite);
+            }
+
+            &.cry {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Boorilla/Boorilla_Cry_128-spritesheet_x2.png', 6, $reaction_width, Boorilla_sprite);
+            }
+
+            &.hipnotic {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Boorilla/Boorilla_Hipnotic_128-spriteheet_x2.png', 8, $reaction_width, Boorilla_hipnotic_sprite);
+            }
+
+            &.sleepy {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Boorilla/Boorilla_Sleepy_128-spritesheet_x2.png', 14, $reaction_width, Boorilla_sleepy_sprite);
+            }
+
+            &.stinky {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Boorilla/Boorilla_Stinky_128-spritesheet_x2.png', 12, $reaction_width, Boorilla_stinky_sprite);
+            }
+
+            &.sugarrush {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Boorilla/Boorilla_Sugerrush_128-spritesheet_x2.png',11, $reaction_width, Boorilla_sugarrush_sprite);
+            }
+
+            &.loud {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Boorilla/Boorilla_TooLoud_128-spritesheet_x2.png', 8, $reaction_width, Boorilla_tooloud_sprite);
+            }
+
+            &.win {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Boorilla/Boorilla_Win-Sheet_X2.png', 20, $reaction_width, Boorilla_win_sprite);
+            }
+        }
+
+        &.BroBot_red {
+            background-image: url('#{$sprite_base}/characters/Reactions/Brobot/Brobot_Idle_128-spritesheet_x2.png');
+
+            &.blink {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Brobot/Brobot_Blink_128_-Sheet_x2.png', 6, $reaction_width, Brobot_blink_sprite);
+            }
+
+            &.cry {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Brobot/Brobot_Cry_128_2-Sheet_x2.png', 6, $reaction_width, Brobot_cry_sprite);
+            }
+
+            &.hipnotic {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Brobot/Brobot_Hipnotic_128_-Sheet_X2.png', 8, $reaction_width, Brobot_hipnotic_sprite);
+            }
+
+            &.sleepy {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Brobot/Brobot_Sleepy_128-Sheet_X2.png', 14, $reaction_width, Brobot_sleepy_sprite);
+            }
+
+            &.stinky {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Brobot/Brobot_Stinky_128-Sheet_X2.png', 12, $reaction_width, Brobot_stinky_sprite);
+            }
+
+            &.sugarrush {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Brobot/Brobot_Sugarush_128_-Sheet_x2.png',11, $reaction_width, Brobot_sugarrush_sprite);
+            }
+
+            &.loud {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Brobot/Brobot_TooLoud_128_-Sheet_X2.png', 8, $reaction_width, Brobot_tooloud_sprite);
+            }
+
+            &.win {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Brobot/Brobot_Win_Sheet_X2.png', 20, $reaction_width, Brobot_win_sprite);
+            }
+        }
+
+        &.Rusty {
+            background-image: url('#{$sprite_base}/characters/Reactions/Rusty/Rusty_Idle_128-spritesheet_x2.png');
+
+            &.blink {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Rusty/Rusty_Blink_128-spritesheet_x2.png', 13, $reaction_width, Rusty_blink_sprite);
+            }
+
+            &.cry {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Rusty/Rusty_Cry_128-spritesheet_x2.png', 25, $reaction_width, Rusty_cry_sprite);
+            }
+
+            &.hipnotic {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Rusty/Rusty_Hipnotic_128-spritesheet_x2.png', 18, $reaction_width, Rusty_hipnotic_sprite);
+            }
+
+            &.sleepy {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Rusty/Rusty_Sleepy_128-spritesheet_x2.png', 24, $reaction_width, Rusty_sleepy_sprite);
+            }
+
+            &.stinky {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Rusty/Rusty_Stinky_128-spritesheet_x2.png', 24, $reaction_width, Rusty_stinky_sprite);
+            }
+
+            &.sugarrush {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Rusty/Rusty_Sugerrush_128-spritesheet_x2.png',25, $reaction_width, Rusty_sugarrush_sprite);
+            }
+
+            &.loud {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Rusty/Rusty_TooLoud_128-spritesheet_x2.png', 23, $reaction_width, Rusty_tooloud_sprite);
+            }
+
+            &.win {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Rusty/Rusty_Win_128-spritesheet_x2.png', 18, $reaction_width, Rusty_win_sprite);
+            }
+        }
+        
+        &.The_Brock {
+            background-image: url('#{$sprite_base}/characters/Reactions/The_Brock/The_Brock_Idle_128-Sheet_X2.png');
+
+            &.blink {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/The_Brock/The_Brock_Blinck_128-Sheet_X2.png', 21, $reaction_width, The_Brock_blink_sprite);
+            }
+
+            &.cry {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/The_Brock/The_Brock_Cry_128-Sheet_X2.png', 24, $reaction_width, The_Brock_cry_sprite);
+            }
+
+            &.hipnotic {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/The_Brock/The_Brock_Hipnotic_128-Sheet_X2.png', 25, $reaction_width, The_Brock_hipnotic_sprite);
+            }
+
+            &.sleepy {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/The_Brock/The_Brock_Sleepy_128-Sheet_X2.png', 25, $reaction_width, The_Brock_sleepy_sprite);
+            }
+
+            &.stinky {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/The_Brock/The_Brock_Stinky_128-Sheet_X2.png', 22, $reaction_width, The_Brock_stinky_sprite);
+            }
+
+            &.sugarrush {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/The_Brock/The_Brock_Sugarush_128-Sheet_X2.png',25, $reaction_width, The_Brock_sugarrush_sprite);
+            }
+
+            &.loud {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/The_Brock/The_Brock_TooLoud_128-Sheet_X2.png', 25, $reaction_width, The_Brock_tooloud_sprite);
+            }
+
+            &.win {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/The_Brock/The_Brock_Win_Sheet_X2.png', 24, $reaction_width, The_Brock_win_sprite);
+            }
+        }
+
+        &.Wooch {
+            background-image: url('#{$sprite_base}/characters/Reactions/Wooch/Wooch_Idle_128-Sheet_X2.png');
+
+            &.blink {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Wooch/Wooch_Blink_128-Sheet_X2.png', 20, $reaction_width, Wooch_blink_sprite);
+            }
+
+            &.cry {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Wooch/Wooch_Cry_128-Sheet_X2.png', 25, $reaction_width, Wooch_cry_sprite);
+            }
+
+            &.hipnotic {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Wooch/Wooch_Hipnotic_128_-Sheet_X2.png', 27, $reaction_width, Wooch_hipnotic_sprite);
+            }
+
+            &.sleepy {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Wooch/Wooch_Sleepy_128_-Sheet_X2.png', 26, $reaction_width, Wooch_sleepy_sprite);
+            }
+
+            &.stinky {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Wooch/Wooch_Stinky_128_2-Sheet_X2.png', 25, $reaction_width, Wooch_stinky_sprite);
+            }
+
+            &.sugarrush {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Wooch/Wooch_Sugarrush_128_-Sheet_X2.png',25, $reaction_width, Wooch_sugarrush_sprite);
+            }
+
+            &.loud {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Wooch/Wooch_TooLoud_128-spritesheet_x2.png', 20, $reaction_width, Wooch_tooloud_sprite);
+            }
+
+            &.win {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Wooch/Wooch_Win_Sheet_X2.png', 25, $reaction_width, Wooch_win_sprite);
+            }
+        }
+
+        &.Trololo {
+            background-image: url('#{$sprite_base}/characters/Reactions/Trololo/Trololo_Idle.png');
+
+            &.blink {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Trololo/Trololo_Blink-Sheet.png', 17, $reaction_width, Trololo_blink_sprite);
+            }
+
+            &.cry {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Trololo/Trololo_Cry-Sheet.png', 24, $reaction_width, Trololo_cry_sprite);
+            }
+
+            &.hipnotic {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Trololo/Trololo_Hipnotic-Sheet.png', 19, $reaction_width, Trololo_hipnotic_sprite);
+            }
+
+            &.sleepy {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Trololo/Trololo_Sleepy-Sheet.png', 23, $reaction_width, Trololo_sleepy_sprite);
+            }
+
+            &.stinky {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Trololo/Trololo_Stink-Sheet.png', 25, $reaction_width, Trololo_stinky_sprite);
+            }
+
+            &.sugarrush {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Trololo/Trololo_Sugarush-Sheet.png',24, $reaction_width, Trololo_sugarrush_sprite);
+            }
+
+            &.loud {
+                @include reaction_animation('#{$sprite_base}/characters/Reactions/Trololo/Trololo_TooLoud_-Sheet.png', 23, $reaction_width, Trololo_tooloud_sprite);
+            }
+
+            &.win {
+                @include reaction_animation_infinite('#{$sprite_base}/characters/Reactions/Trololo/Trololo_Win-Sheet.png', 22, $reaction_width, Trololo_win_sprite);
+            }
+        }
+    }
+    .name {
+        width: $reaction_width;
+        height: 34px;
+        line-height: 34px;
+        font-size: 16px;
+        margin-bottom: 8px;
+        display: inline-block;
+        background-image: url('#{$sprite_base}/ui/duel/fight - char name frame/name_frame_128x17_x2.png');
+        
+        color: #f4c845;
+        text-align: center;
+    }
+
+    .duel_item {
+        height: 200px;
+        margin: 155px 20px 20px 20px;
+        display: inline-block;
+
+        &.invert {
+            transform: scaleX(-1);
+        }
+
+        &.Gong_Long {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/Gong_Long/Gong_Long_attack_spritesheet_72_x2.png', 6, 144px, Gong_Long_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/Gong_Long/Gong_Long_defence_spritesheet_72_x2.png', 7, 144px, Gong_Long_defence_sprite);
+            }
+        }
+        &.Flashfunk {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/Flashfunk/Flashfunk_Attack_spriteheet.png', 14, 144px, Flashfunk_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/Flashfunk/Flashfunk_Defense_spriteheet.png', 10, 144px, Flashfunk_defence_sprite);
+            }
+        }
+        &.TonyStank {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/TonyStank/TonyStank_Attack_spritesheet.png', 8, 144px, TonyStank_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/TonyStank/TonyStank_Defense_spritesheet.png', 6, 144px, TonyStank_defence_sprite);
+            }
+        }
+        &.TeleFart {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/TeleFart/TeleFart_Attack_spritesheet.png', 6, 144px, TeleFart_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/TeleFart/TeleFart_Defense_spriteheet.png', 10, 144px, TeleFart_defence_sprite);
+            }
+        }
+        &.HonkHonk {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/HonkHonk/HonkHonk_Attack_spritesheet.png', 4, 144px, HonkHonk_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/HonkHonk/HonkHonk_Defense_spritesheet.png', 4, 144px, HonkHonk_defence_sprite);
+            }
+        }
+        &.Grooviton {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/Grooviton/Grooviton_Attack_spritesheett.png', 6, 144px, Grooviton_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/Grooviton/Grooviton_defense_spritesheet.png', 7, 144px, Grooviton_defence_sprite);
+            }
+        }
+
+        &.PlantPlug {
+            height: 144px;
+
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/PlantPlug/PlantPlug_Defence_spritesheet.png', 9, 144px, PlantPlug_defence_sprite);
+            }
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/PlantPlug/PlantPlug_Defence_spritesheet.png', 9, 144px, PlantPlug_attack_sprite);
+        }
+    }
+
+        &.SugarCrush {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/SugarCrush/SugarCrush_Attack_spritesheet.png', 9, 144px, SugarCrush_attack_sprite);
+         
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/SugarCrush/SugarCrush_Attack_spritesheet.png', 9, 144px, SugarCrush_defence_sprite);
+        }
+        }
+
+        &.Mirror_Mirror {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/Mirror_Mirror/Mirror_Mirror_attack_spritesheet_72_x2.png', 3, 144px, Mirror_Mirror_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/Mirror_Mirror/Mirror_Mirror_defence_spritesheet_72_x2.png', 4, 144px, Mirror_Mirror_defence_sprite);
+            }
+        }
+        
+       
+        &.PocketHole {
+            height: 144px;
+    
+             &.attack {
+                @include sprite_animation('#{$sprite_base}/items/PocketHole/PocketHole_Attack_spritesheet.png', 9, 144px, PocketHole_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/PocketHole/PocketHole_Attack_spritesheet.png', 9, 144px, PocketHole_defence_sprite);
+                
+            }
+         
+        }
+        &.ClementEye {
+            height: 144px;
+    
+             &.attack {
+                @include sprite_animation('#{$sprite_base}/items/ClementEye/ClementEye_Attack_spritesheet.png', 4, 144px, ClementEye_attack_sprite);
+            }
+             &.defence {
+                @include sprite_animation('#{$sprite_base}/items/ClementEye/ClementEye_defence_spritesheet_72_x2.png', 11, 144px, ClementEye_defence_sprite);
+            }  
+        }
+        &.Smellmonell {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/Smellmonell/Smellmonell_attack_spritesheet_72_x2.png', 9, 144px, Smellmonell_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/Smellmonell/Smellmonell_defence_spritesheet_72_x2.png', 4, 144px, Smellmonell_defence_sprite);
+            }
+        }
+        &.SnoozeBest {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/SnoozeBest/SnoozeBest_Attack_spritesheet.png', 8, 144px, SnoozeBest_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/SnoozeBest/SnoozeBest_Defence_spritesheet.png', 13, 144px, SnoozeBest_defence_sprite);
+            }
+        }
+        &.Fatty_Patty {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/Fatty_Patty/Fatty_Patty_attack.png', 17, 144px, Fatty_Patty_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/Fatty_Patty/Fatty_Patty_attack.png', 17, 144px, Fatty_Patty_defence_sprite);
+            }
+            }
+
+        &.CactusJack {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/CactusJack/CactusJack_Attack_Spritesheet.png', 12, 144px, CactusJack_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/CactusJack/CactusJack_Defence_spritesheet.png', 8, 144px, CactusJack_defence_sprite);
+            }
+        }
+        &.Cloak_kent {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/Cloak_kent/Cloak_kent_Attack_spriteheet.png', 5, 144px, Cloak_kent_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/Cloak_kent/Cloak_kent_Defense_spritesheet.png', 8, 144px, Cloak_kent_defence_sprite);
+            }
+        }
+        &.DiamondDough {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/DiamondDough/DiamondDough_Attack_spritesheet.png', 9, 144px, DiamondDough_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/DiamondDough/DiamondDough_Attack_spritesheet.png', 9, 144px, DiamondDough_defence_sprite);
+            }
+        }
+        &.DurianGrey {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/DurianGrey/DurianGrey_Attack_spritesheet.png', 6, 144px, DurianGrey_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/DurianGrey/DurianGrey_Defence_spritesheet.png', 3, 144px, DurianGrey_defence_sprite);
+            }
+        }
+        &.ForkThis {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/ForkThis/ForkThis_Attack_spritesheet.png', 10, 144px, ForkThis_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/ForkThis/ForkThis_Defence_spritesheet.png', 9, 144px, ForkThis_defence_sprite);
+            }
+        }
+        &.CalciumFancium {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/CalciumFancium/CalciumFancium_Attack_spritesheet.png', 4, 144px, CalciumFancium_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/CalciumFancium/CalciumFancium_Defence_spritesheet.png', 7, 144px, CalciumFancium_defence_sprite);
+            }
+        }
+        &.HolyMoly {
+            height: 144px;
+            
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/HolyMoly/HolyMoly_Defence_spritesheet.png', 4, 144px, HolyMoly_attack_sprite);
+            }
+          
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/HolyMoly/HolyMoly_Defence_spritesheet.png', 4, 144px, HolyMoly_defence_sprite);
+            }
+        }
+        &.SlitheringSoup {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/SlitheringSoup/SlitheringSoup_Attack_spritesheet.png', 8, 144px, SlitheringSoup_attack_sprite);
+            }
+     
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/SlitheringSoup/SlitheringSoup_Attack_spritesheet.png', 8, 144px, SlitheringSoup_defence_sprite);
+            }
+        }
+        &.StingySullivan {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/StingySullivan/StingySullivan_Attack_spritesheet.png', 9, 144px, StingySullivan_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/StingySullivan/StingySullivan_Defence_spritesheet.png', 15, 144px, StingySullivan_defence_sprite);
+            }
+        }
+        &.Nosy_Nolan {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/Nosy_Nolan/Nosy_Nolan_attack_spritesheet_72_x2.png', 7, 144px, Nosy_Nolan_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/Nosy_Nolan/Nosy_Nolan_defence_spritesheet_72_x2.png', 13, 144px, Nosy_Nolan_defence_sprite);
+            }
+        }
+        &.OminousOnion {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/OminousOnion/OminousOnion_Attack_spritesheet.png', 5, 144px, OminousOnion_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/OminousOnion/OminousOnion_Defence_spritesheet.png', 3, 144px, OminousOnion_defence_sprite);
+            }
+        }
+        &.Foxy_boxy {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/Foxy_boxy/Foxy_boxy_Attack_spriteseet.png', 11, 144px, Foxy_boxy_Attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/Foxy_boxy/Foxy_boxy_Defense_spritesheett.png', 10, 144px, Foxy_boxy_Defense_sprite);
+            }
+        }
+   
+        &.Hypnomon {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/Hypnomon/Hypnomon_Attack_spritesheet.png', 10, 144px, Hypnomon_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/Hypnomon/Hypnomon_Defence_spritesheet.png', 6, 144px, Hypnomon_defence_sprite);
+            }
+        }
+        &.ShimmerGlimmer {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/ShimmerGlimmer/ShimmerGlimmer_Attack_spriteheet.png', 9, 144px, ShimmerGlimmer_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/ShimmerGlimmer/ShimmerGlimmer_Defense_spriteheet.png', 9, 144px, ShimmerGlimmer_defence_sprite);
+            }
+        }
+        &.Rainbow_Munch {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/Rainbow_Munch/Rainbow_Munch_attack_spritesheet_72_x2.png', 5, 144px, Rainbow_Munch_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/Rainbow_Munch/Rainbow_Munch_attack_spritesheet_72_x2.png', 5, 144px, Rainbow_Munch_defence_sprite);
+            }
+        }
+        &.Skelebowl {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/Skelebowl/Skelebowl_Attack_spritesheet.png', 10, 144px, Skelebowl_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/Skelebowl/Skelebowl_Attack_spritesheet.png', 10, 144px, Skelebowl_defence_sprite);
+            }
+        }
+        &.DeFeeters {
+            height: 144px;
+
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/DeFeeters/DeFeeters_Attack_spritesheet.png', 8, 144px, DeFeeters_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/DeFeeters/DeFeeters_Defence_spritesheet.png', 17, 144px, DeFeeters_defence_sprite);
+            }
+        }
+        &.BlingRing {
+            height: 144px;
+    
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/Bling_Ring/BlingRing_Attack_spritesheet.png', 14, 144px, BlingRing_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/Bling_Ring/BlingRing_Defence_spriteheet.png', 11, 144px, BlingRing_defence_sprite);
+            }
+        }
+        &.NastyNoodles {
+            height: 144px;
+    
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/NastyNoodles/NastyNoodles_Attack_spritesheet.png', 8, 144px, NastyNoodles_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/NastyNoodles/NastyNoodles_Attack_spritesheet.png', 8, 144px, NastyNoodles_defence_sprite);
+            }
+        }
+        &.Wonder_Wall {
+            height: 156px;
+    
+            &.attack {
+                @include sprite_animation('#{$sprite_base}/items/glass_wall/glass_wall_animation-Sheet.png', 8, 150px, glass_wall_attack_sprite);
+            }
+            &.defence {
+                @include sprite_animation('#{$sprite_base}/items/glass_wall/glass_wall_animation-Sheet.png', 8, 150px, glass_wall_defence_sprite);
+            }
+        }
+    }
+}
+
+.item_icon {
+    width: 32px;
+    height: 32px;
+    display: grid;
+    direction: ltr;
+
+    .item_popover {
+        display: none;
+        position: relative;
+        background: #222034;
+        width: 300px;
+        margin: -5px 32px;
+        left: -70px;
+        bottom: calc(100% + 5px);
+
+        h2, p {
+            margin: 10px 22px;
+        }
+    }
+
+    &.popover .item_popover {
+        display: inherit;
+    }
+
+    &.TeleFart {
+        background-image: url('#{$sprite_base}/items/TeleFart/TeleFart_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/TeleFart/TeleFart_32_sillhoute.png'); 
+        }
+    }
+
+    &.TonyStank {
+        background-image: url('#{$sprite_base}/items/TonyStank/TonyStank_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/TonyStank/TonyStank_32_silhouette.png');
+        }
+    }
+    
+    &.Grooviton {
+        background-image: url('#{$sprite_base}/items/Grooviton/Grooviton_32.png');
+
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/Grooviton/Grooviton_32_silhouette.png');
+        }
+    }
+    
+    &.Flashfunk {
+        background-image: url('#{$sprite_base}/items/Flashfunk/Flashfunk_32.png');
+
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/Flashfunk/Flashfunk_32_silhouette.png');
+        }
+    }
+    
+    &.HonkHonk {
+        background-image: url('#{$sprite_base}/items/HonkHonk/HonkHonk_32.png');
+
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/HonkHonk/HonkHonk_32_sillhoute.png');
+        }
+    }
+    
+    &.Gong_Long {
+        background-image: url('#{$sprite_base}/items/Gong_Long/Gong_Long_32.png');
+
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/Gong_Long/Gong_Long_32_silhouette.png');
+        }
+    }
+    
+    &.PlantPlug {
+        background-image: url('#{$sprite_base}/items/PlantPlug/PlantPlug_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/PlantPlug/PlantPlug_32_silhouette.png');
+        }
+    }
+    
+    &.SugarCrush {
+        background-image: url('#{$sprite_base}/items/SugarCrush/SugarCrush_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/SugarCrush/SugarCrush_32_silhouette.png');
+        }
+    }
+    
+    &.NastyNoodles {
+        background-image: url('#{$sprite_base}/items/NastyNoodles/NastyNoodles_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/NastyNoodles/NastyNoodles_32_silhouette.png');
+        }
+    }
+    
+    &.Mirror_Mirror {
+        background-image: url('#{$sprite_base}/items/Mirror_Mirror/Mirror_Mirror_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/Mirror_Mirror/Mirror_Mirror_32_silhouette.png');
+        }
+    }
+    &.Smellmonell {
+        background-image: url('#{$sprite_base}/items/Smellmonell/Smellmonell_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/Smellmonell/Smellmonell_32_silhouette.png');
+        }
+    }
+    &.SnoozeBest {
+        background-image: url('#{$sprite_base}/items/SnoozeBest/SnoozeBest_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/SnoozeBest/SnoozeBest_32_silhouette.png');
+        }
+    }
+    &.Fatty_Patty {
+        background-image: url('#{$sprite_base}/items/Fatty_Patty/Fatty_Patty_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/Fatty_Patty/Fatty_Patty_32_silhouette.png');
+        }
+    }
+    &.CactusJack {
+        background-image: url('#{$sprite_base}/items/CactusJack/CactusJack_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/CactusJack/CactusJack_32_silhouette.png');
+        }
+    }
+    &.Cloak_kent {
+        background-image: url('#{$sprite_base}/items/Cloak_kent/Cloak_kent_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/Cloak_kent/Cloak_kent_32_silhouette.png');
+        }
+    }
+    &.DiamondDough {
+        background-image: url('#{$sprite_base}/items/DiamondDough/DiamondDough_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/DiamondDough/DiamondDough_32_silhouette.png');
+        }
+    }
+    &.DurianGrey {
+        background-image: url('#{$sprite_base}/items/DurianGrey/DurianGrey_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/DurianGrey/DurianGrey_32_silhouette.png');
+        }
+    }
+    &.ForkThis {
+        background-image: url('#{$sprite_base}/items/ForkThis/ForkThis_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/ForkThis/ForkThis_32_silhouette.png');
+        }
+    }
+    &.CalciumFancium {
+        background-image: url('#{$sprite_base}/items/CalciumFancium/CalciumFancium_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/CalciumFancium/CalciumFancium_32_silhouette.png');
+        }
+    }  
+    &.HolyMoly {
+        background-image: url('#{$sprite_base}/items/HolyMoly/HolyMoly_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/HolyMoly/HolyMoly_32_silhouette.png');
+        }
+    }
+    &.SlitheringSoup {
+        background-image: url('#{$sprite_base}/items/SlitheringSoup/SlitheringSoup_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/SlitheringSoup/SlitheringSoup_32_silhouette.png');
+        }
+    }
+    &.StingySullivan {
+        background-image: url('#{$sprite_base}/items/StingySullivan/StingySullivan_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/StingySullivan/StingySullivan_32_silhouette.png');
+        }
+    }
+    &.Nosy_Nolan {
+        background-image: url('#{$sprite_base}/items/Nosy_Nolan/Nosy_Nolan_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/Nosy_Nolan/Nosy_Nolan_silhouette.png');
+        }
+    }
+    &.OminousOnion {
+        background-image: url('#{$sprite_base}/items/OminousOnion/OminousOnion_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/OminousOnion/OminousOnion_32_silhouette.png');
+        }
+    }
+    &.Foxy_boxy {
+        background-image: url('#{$sprite_base}/items/Foxy_boxy/Foxy_boxy_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/Foxy_boxy/Foxy_boxy_32_silhouette.png');
+        }
+    }
+    &.ClementEye {
+        background-image: url('#{$sprite_base}/items/ClementEye/ClementEye_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/ClementEye/ClementEye_32_silhouette.png');
+        }
+    }
+    &.Hypnomon {
+        background-image: url('#{$sprite_base}/items/Hypnomon/Hypnomon_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/Hypnomon/Hypnomon_32_silhouette.png');
+        }
+    }
+    &.ShimmerGlimmer {
+        background-image: url('#{$sprite_base}/items/ShimmerGlimmer/ShimmerGlimmer_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/ShimmerGlimmer/ShimmerGlimmer_32_silhouette.png');
+        }
+    }
+    &.Rainbow_Munch {
+        background-image: url('#{$sprite_base}/items/Rainbow_Munch/Rainbow_Munch_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/Rainbow_Munch/Rainbow_Munch_32_silhouette.png');
+        }
+    }
+    &.Skelebowl {
+        background-image: url('#{$sprite_base}/items/Skelebowl/Skelebowl_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/Skelebowl/Skelebowl_32_silhouette.png');
+        }
+    }
+    &.DeFeeters {
+        background-image: url('#{$sprite_base}/items/DeFeeters/DeFeeters_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/DeFeeters/DeFeeters_32_silhouette.png');
+        }
+    }
+    &.BlingRing {
+        background-image: url('#{$sprite_base}/items/Bling_Ring/BlingRing_32.png');
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/Bling_Ring/BlingRing_32_silhouette.png');
+        }
+    }
+    &.PocketHole {
+        background-image: url('#{$sprite_base}/items/PocketHole/PocketHole_32.png');  
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/PocketHole/PocketHole_32_sillhoute.png'); 
+        }
+    }
+       
+    &.Wonder_Wall {
+        background-image: url('#{$sprite_base}/items/Glass_Wall/glass_wall_32.png');  
+        
+        &.disabled {
+            background-image: url('#{$sprite_base}/items/Glass_Wall/glass_wall_32_sillhoute.png');  
+        }
+    }
+}
+
+.number {
+    width: 25px;
+    height: 28px;
+    margin: 0px 3.5px 2px 3.5px;
+
+    &.number-0 {
+        background-image: url('#{$sprite_base}/ui/duel/fight - numbers/1.png');
+    }
+
+    &.number-1 {
+        background-image: url('#{$sprite_base}/ui/duel/fight - numbers/2.png');
+    }
+
+    &.number-2 {
+        background-image: url('#{$sprite_base}/ui/duel/fight - numbers/3.png');
+    }
+}
+
+.inventory {
+    width: 256px;
+    display: flex;
+    justify-content: space-around;
+
+    .inventory_item {
+        $padding: 5px;
+        width: 42px - 2 * $padding;
+        height: 53px - 2 * $padding;
+        padding: $padding;
+        background-image: url('#{$sprite_base}/ui/duel/fight - inventory frame/icon_42x42.png');
+        background-repeat: no-repeat;
+        display: inline-block;
+    }
+}
+
+#status_bar {
+    z-index: 20000;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    
+    display: flex;
+    justify-content: space-between;
+    grid-row-start: 2;
+}
+
+#last_action_results {
+    display: flex;
+}
+
+#help_window {
+    width: 800px;
+    height: 600px;
+
+    h2 {
+        margin-left: 42px;
+    }
+    p, h3 {
+        margin-left: 62px;
+    }
+    img {
+        margin: 20px;
+    }
+}

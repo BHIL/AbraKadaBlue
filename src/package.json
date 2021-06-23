@@ -1,0 +1,29 @@
+{
+  "dependencies": {
+    "@babel/core": "^7.14.0",
+    "@babel/plugin-proposal-optional-chaining": "^7.13.12",
+    "@babel/preset-react": "^7.0.0",
+    "@microsoft/applicationinsights-web": "^2.6.2",
+    "babel-loader": "^8.0.5",
+    "babel-plugin-search-and-replace": "^1.0.0",
+    "classnames": "^2.3.1",
+    "del": "^6.0.0",
+    "gulp": "^4.0.0",
+    "gulp-babel": "^8.0.0",
+    "gulp-concat": "^2.6.1",
+    "gulp-flowtype": "^1.0.0",
+    "gulp-sass": "^4.0.2",
+    "gulp-size": "^4.0.0",
+    "react": "^16.8.6",
+    "react-beautiful-dnd": "^13.1.0",
+    "react-custom-scrollbars": "^4.2.1",
+    "react-dom": "^16.8.6",
+    "react-keyboard-event-handler": "^1.5.4",
+    "webpack-stream": "^6.1.2"
+  },
+  "scripts": {
+    "run": "python debug.py",
+    "build": "gulp build",
+    "watch": "gulp build_and_watch"
+  }
+}
