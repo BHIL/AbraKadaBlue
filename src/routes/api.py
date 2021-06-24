@@ -1,10 +1,9 @@
-from config.Items import Items
 from routes.login import loggedInOnly, apiErrorWrapper
 
 from application import app, db
 from models import User, Duel
 from workers import BrokerWorker, DuelMatchmakerWorker, GameEngineWorker, TraderWorker
-from config import NPCs, NPC, INITIAL_INVENTORY, UNLOCK_SCORES, TUTORIAL_UNLOCK, items_by_id
+from config import NPCs, NPC, INITIAL_INVENTORY, INITIAL_INVENTORY_AFTER_TUTORIAL, UNLOCK_SCORES, TUTORIAL_UNLOCK, items_by_id
 from config.consts import TIME_TO_CHECK_TICK
 from utils import Logger, TempInventory
 from utils.SharedRowLock import UserLock
@@ -232,7 +231,11 @@ def reset_inventory():
     with UserLock(g.user):
         assert g.user.status == User.Status.MAP, 'The user is not in the map'
 
-        g.user.set_inventory(TempInventory(INITIAL_INVENTORY))
+        is_in_tutorial = any(TUTORIAL_UNLOCK == locked_npc.npc_id for locked_npc in g.user.locked_npcs)
+        if is_in_tutorial:
+            g.user.set_inventory(TempInventory(INITIAL_INVENTORY))
+        else:
+            g.user.set_inventory(TempInventory(INITIAL_INVENTORY_AFTER_TUTORIAL))
 
     return jsonify(render_user_state(g.user))
 
@@ -268,7 +271,7 @@ def api_unlock_npc():
 
         # If the player completed the tutorial, reset the inventory to the initial one
         if npc_id == TUTORIAL_UNLOCK:
-            user_inv = INITIAL_INVENTORY
+            user_inv = TempInventory(INITIAL_INVENTORY_AFTER_TUTORIAL)
 
         g.user.unlocks_score += UNLOCK_SCORES[npc_id]
         g.user.set_inventory(user_inv)

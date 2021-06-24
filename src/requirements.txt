@@ -1,0 +1,11 @@
+flask
+flask_sqlalchemy
+jsonschema
+dataclasses_json
+pyodbc
+apscheduler
+opencensus-ext-azure
+opencensus-ext-flask
+opencensus-ext-requests
+opencensus-ext-sqlalchemy
+opencensus-ext-logging

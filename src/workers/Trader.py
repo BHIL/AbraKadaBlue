@@ -26,7 +26,7 @@ ITEM_LIST_SCHEMA = {
             },
             'quantity': { 
                 "type" : "integer",
-                "minimum": 1,
+                "minimum": 0,
                 "maximum": 100,
             },
         }

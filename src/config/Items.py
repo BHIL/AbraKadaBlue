@@ -225,6 +225,14 @@ INITIAL_INVENTORY = [
     {'item_id': Items.FattyPatty.id, 'amount': 9},
     {'item_id': Items.CactusJack.id, 'amount': 8},
     {'item_id': Items.WonderWall.id, 'amount': 8},
+    {'item_id': Items.SugarCrush.id, 'amount': 1},
+]
+
+INITIAL_INVENTORY_AFTER_TUTORIAL = [
+    {'item_id': Items.OminousOnion.id, 'amount': 30},
+    {'item_id': Items.SnoozeBest.id, 'amount': 30},
+    {'item_id': Items.ForkThis.id, 'amount': 30},
+    {'item_id': Items.ShimmerGlimmer.id, 'amount': 30},
 ]
 
 MAX_INVENTORY_SIZE = 5
