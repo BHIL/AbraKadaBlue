@@ -612,14 +612,10 @@ NPCs = {
         # Arena Masters #
         # ############# #
         NPC('M1', NPC.Kind.ARENA_MASTER,
-            permitted_items=[
-                ALL_ITEMS
-            ]
+            permitted_items = ALL_ITEMS
         ),
         NPC('M2', NPC.Kind.ARENA_MASTER,
-            permitted_items=[
-                ALL_ITEMS
-            ]
+            permitted_items = ALL_ITEMS
         ),
         NPC('M3', NPC.Kind.ARENA_MASTER,
             allow_human_duels = True, # The most human arena master
@@ -645,9 +641,7 @@ NPCs = {
             ]
         ),
         NPC('M4', NPC.Kind.ARENA_MASTER,
-            permitted_items=[
-                ALL_ITEMS
-            ],
+            permitted_items = ALL_ITEMS,
             unlock_price=Items.PlantPlug.id
         ),
         NPC('TM1', NPC.Kind.ARENA_MASTER,
